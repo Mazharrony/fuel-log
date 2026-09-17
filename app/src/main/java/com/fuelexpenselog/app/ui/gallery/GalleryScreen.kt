@@ -3,6 +3,7 @@ package com.fuelexpenselog.app.ui.gallery
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fuelexpenselog.app.domain.model.ExpenseCategory
 import com.fuelexpenselog.app.ui.components.ActionBar
 import com.fuelexpenselog.app.ui.components.ChartBar
 import com.fuelexpenselog.app.ui.components.ConsumptionBarChart
@@ -30,6 +32,7 @@ import com.fuelexpenselog.app.ui.components.Hairline
 import com.fuelexpenselog.app.ui.components.PrimaryAction
 import com.fuelexpenselog.app.ui.components.SecondaryAction
 import com.fuelexpenselog.app.ui.components.SectionLabel
+import com.fuelexpenselog.app.ui.components.SegmentedRow
 import com.fuelexpenselog.app.ui.components.Sparkline
 import com.fuelexpenselog.app.ui.components.SplitBar
 import com.fuelexpenselog.app.ui.components.SquareChip
@@ -38,6 +41,7 @@ import com.fuelexpenselog.app.ui.components.SunkenPanel
 import com.fuelexpenselog.app.ui.components.ToggleRow
 import com.fuelexpenselog.app.ui.components.TotalRow
 import com.fuelexpenselog.app.ui.components.WarningBlock
+import com.fuelexpenselog.app.ui.format.label
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
 
@@ -54,6 +58,8 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
     val colors = FuelTheme.colors
     var fullTank by remember { mutableStateOf(true) }
     var selectedChip by remember { mutableStateOf(0) }
+    var distanceUnit by remember { mutableStateOf("Miles") }
+    var convention by remember { mutableStateOf("MPG US") }
     val odometer = rememberTextFieldState("84210")
     val volume = rememberTextFieldState("11.8")
 
@@ -134,11 +140,29 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
                 ToggleRow(label = "Full tank", checked = fullTank, onCheckedChange = { fullTank = it })
             }
 
-            Section("Chips") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("Oil change", "Service", "Tyres").forEachIndexed { index, label ->
+            Section("Segmented rows - fixed, short option sets") {
+                SegmentedRow(
+                    options = listOf("Miles", "Kilometres"),
+                    selected = distanceUnit,
+                    onSelect = { distanceUnit = it },
+                    label = { it },
+                )
+                SegmentedRow(
+                    options = listOf("MPG US", "MPG UK", "L/100km", "km/L"),
+                    selected = convention,
+                    onSelect = { convention = it },
+                    label = { it },
+                )
+            }
+
+            Section("Chips - wrapping, for the twelve expense categories") {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ExpenseCategory.chipOrder.forEachIndexed { index, category ->
                         SquareChip(
-                            label = label,
+                            label = category.label(),
                             selected = selectedChip == index,
                             onClick = { selectedChip = index },
                         )

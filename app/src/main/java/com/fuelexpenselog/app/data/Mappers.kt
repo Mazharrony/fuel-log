@@ -20,6 +20,7 @@ fun VehicleEntity.toDomain() = Vehicle(
     currency = currency,
     tankCapacityLitres = tankCapacityLitres,
     isActive = isActive,
+    createdAt = createdAt,
 )
 
 fun Vehicle.toEntity() = VehicleEntity(
@@ -30,6 +31,7 @@ fun Vehicle.toEntity() = VehicleEntity(
     currency = currency,
     tankCapacityLitres = tankCapacityLitres,
     isActive = isActive,
+    createdAt = createdAt,
 )
 
 fun FillUpEntity.toDomain() = FillUp(

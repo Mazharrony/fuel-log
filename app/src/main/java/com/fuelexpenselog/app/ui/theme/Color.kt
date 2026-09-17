@@ -26,8 +26,22 @@ data class FuelColors(
     val strongHairline: Color,
     val labelInk: Color,
     val bodyGrey: Color,
+    /**
+     * A fifth grey, used 52 times in the design prototype and absent from the
+     * handoff token table entirely. It - not bodyGrey - is the colour of
+     * vehicle meta, unit labels beside a figure, odometer readouts, chevrons,
+     * and history row meta and rate.
+     *
+     * The three greys are genuinely distinct roles:
+     *   metaGrey  #6B7280  meta sitting beside a figure
+     *   labelInk  #5E6773  uppercase micro-labels
+     *   bodyGrey  #55606C  explanatory prose
+     */
+    val metaGrey: Color,
     val yellowWash: Color,
     val warningInk: Color,
+    /** Warning-block icon stroke. Distinct from the warningInk beside it. */
+    val warningIcon: Color,
     /**
      * Text on yellow. FIXED in both schemes.
      *
@@ -56,8 +70,10 @@ data class FuelColors(
             strongHairline = Color(0xFFBFC7D1),
             labelInk = Color(0xFF5E6773),   // 5.4:1 on paper
             bodyGrey = Color(0xFF55606C),   // 6.0:1 on paper
+            metaGrey = Color(0xFF6B7280),
             yellowWash = Color(0xFFFFF6CE),
             warningInk = Color(0xFF4A4218),
+            warningIcon = Color(0xFF8A7300),
             onYellow = Ink,
             onYellowSecondary = Color(0xFF6B5B00),  // 4.5:1 on yellow
             destructive = Color(0xFF9B2C2C),
@@ -84,8 +100,10 @@ data class FuelColors(
             strongHairline = Color(0xFF3D4752),
             labelInk = Color(0xFF8794A3),
             bodyGrey = Color(0xFF9AA5B1),
+            metaGrey = Color(0xFF8C97A5),        // derived
             yellowWash = Color(0xFF2A2410),      // proposed
             warningInk = Color(0xFFE8DFA8),      // proposed
+            warningIcon = Color(0xFFD8C36A),     // derived
             onYellow = Ink,                      // fixed, never inverted
             onYellowSecondary = Color(0xFF6B5B00),
             destructive = Color(0xFFE06C6C),

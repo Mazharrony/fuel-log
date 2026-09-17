@@ -20,7 +20,19 @@ enum class ExpenseCategory(val isMaintenance: Boolean) {
     TAX(false),
     FINE(false),
     WASH(false),
-    OTHER(false),
+    OTHER(false);
+
+    companion object {
+        /**
+         * Chip order on the add-expense screen, which is NOT the enum
+         * declaration order - the design groups by how often each is used,
+         * the enum groups by whether it is maintenance.
+         */
+        val chipOrder: List<ExpenseCategory> = listOf(
+            OIL_CHANGE, SERVICE, REPAIR, TYRES, TOLL, PARKING,
+            INSURANCE, TAX, FINE, WASH, PARTS, OTHER,
+        )
+    }
 }
 
 /**

@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface VehicleDao {
-    @Query("SELECT * FROM vehicle ORDER BY isActive DESC, id ASC")
+    @Query("SELECT * FROM vehicle ORDER BY isActive DESC, createdAt ASC, id ASC")
     fun observeAll(): Flow<List<VehicleEntity>>
 
     @Query("SELECT * FROM vehicle WHERE id = :id")

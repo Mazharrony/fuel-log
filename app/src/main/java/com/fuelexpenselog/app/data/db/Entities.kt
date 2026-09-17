@@ -17,6 +17,7 @@ data class VehicleEntity(
     val currency: String,
     val tankCapacityLitres: Double?,
     val isActive: Boolean = true,
+    val createdAt: Long = 0,
 )
 
 /**

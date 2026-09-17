@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -31,6 +30,8 @@ import com.fuelexpenselog.app.ui.motion.StandardEasing
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
 import kotlin.math.max
+
+private const val EM_DASH = "—"
 
 /**
  * One value in the consumption chart. A null [value] is a span the engine could
@@ -139,7 +140,7 @@ private fun DrawScope.drawBars(
     val plotHeight = plotBottom - plotTop
     if (plotHeight <= 0f) return
 
-    val gap = 6.dp.toPx()
+    val gap = Dimens.chartBarGap.toPx()
     val barWidth = (size.width - gap * (barCount - 1)) / barCount
     val maxValue = bars.mapNotNull { it.value }.maxOrNull() ?: 1.0
 
@@ -158,21 +159,28 @@ private fun DrawScope.drawBars(
         val x = index * (barWidth + gap)
 
         if (bar.value == null) {
-            // A dash on the baseline, not a zero-height bar: nothing was
-            // measured here, and zero would be a lie.
-            val dashY = plotBottom - 12.dp.toPx()
-            drawLine(
-                color = inactiveColor,
-                start = Offset(x + barWidth * 0.3f, dashY),
-                end = Offset(x + barWidth * 0.7f, dashY),
-                strokeWidth = 2.dp.toPx(),
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 5f)),
-            )
+            // A 3dp stub, with an EM DASH where the figure would be.
+            //
+            // The dash is the whole point: this span has no consumption figure
+            // because the fuel chain breaks here, and showing a dash rather than
+            // a zero is the difference between the app admitting it does not
+            // know and the app quietly inventing a number.
+            val stubHeight = 3.dp.toPx() * grow
             drawRect(
                 color = emptyColor,
-                topLeft = Offset(x, plotBottom - 4.dp.toPx() * grow),
-                size = Size(barWidth, 4.dp.toPx() * grow),
+                topLeft = Offset(x, plotBottom - stubHeight),
+                size = Size(barWidth, stubHeight),
             )
+            if (grow > 0.6f) {
+                val layout = measurer.measure(EM_DASH, captionStyle)
+                drawText(
+                    textLayoutResult = layout,
+                    topLeft = Offset(
+                        x + (barWidth - layout.size.width) / 2f,
+                        plotBottom - stubHeight - layout.size.height - 3.dp.toPx(),
+                    ),
+                )
+            }
         } else {
             val fraction = (bar.value / maxValue).toFloat().coerceIn(0f, 1f)
             val barHeight = max(1f, plotHeight * fraction * 0.86f * grow)
@@ -229,7 +237,7 @@ fun Sparkline(
             .fillMaxWidth()
             .height(Dimens.sparklineHeight)
     ) {
-        val gap = 4.dp.toPx()
+        val gap = Dimens.sparklineBarGap.toPx()
         val barWidth = (size.width - gap * (values.size - 1)) / values.size
         val maxValue = values.filterNotNull().maxOrNull() ?: 1.0
         val latestRealIndex = values.indexOfLast { it != null }

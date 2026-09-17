@@ -40,7 +40,17 @@ object Dimens {
     val warningRule = 3.dp
 
     val sectionGap = 28.dp
-    val chartHeight = 200.dp
-    val sparklineHeight = 36.dp
-    val splitBarHeight = 10.dp
+
+    // Chart and sparkline metrics come straight from the design source.
+    val chartHeight = 220.dp
+    val chartBarGap = 7.dp
+    val sparklineHeight = 26.dp
+    val sparklineBarGap = 4.dp
+    /** Bars per sparkline and per consumption chart. */
+    const val CHART_BARS = 9
+
+    /** Months screen. */
+    val splitBarHeight = 8.dp
+    /** Month-detail category bars. */
+    val categoryBarHeight = 6.dp
 }

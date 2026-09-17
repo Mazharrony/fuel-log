@@ -20,4 +20,6 @@ data class Vehicle(
     val tankCapacityLitres: Double? = null,
     /** Sold vehicles are hidden, never deleted - the history stays. */
     val isActive: Boolean = true,
+    /** Epoch millis. Orders the garage so vehicles keep the order they were added. */
+    val createdAt: Long = 0,
 )
