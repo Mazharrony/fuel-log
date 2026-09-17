@@ -1,0 +1,258 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "605459694caf153ab43830e705766b4b",
+    "entities": [
+      {
+        "tableName": "vehicle",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `distanceUnit` TEXT NOT NULL, `volumeUnit` TEXT NOT NULL, `currency` TEXT NOT NULL, `tankCapacityLitres` REAL, `isActive` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceUnit",
+            "columnName": "distanceUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "volumeUnit",
+            "columnName": "volumeUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tankCapacityLitres",
+            "columnName": "tankCapacityLitres",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "fill_up",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `vehicleId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `odometer` REAL NOT NULL, `volume` REAL NOT NULL, `totalCost` REAL NOT NULL, `isFullTank` INTEGER NOT NULL, `isMissedEntry` INTEGER NOT NULL, `fuelType` TEXT, `note` TEXT, FOREIGN KEY(`vehicleId`) REFERENCES `vehicle`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "odometer",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "volume",
+            "columnName": "volume",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalCost",
+            "columnName": "totalCost",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFullTank",
+            "columnName": "isFullTank",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isMissedEntry",
+            "columnName": "isMissedEntry",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fuelType",
+            "columnName": "fuelType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_fill_up_vehicleId_odometer",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "odometer"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fill_up_vehicleId_odometer` ON `${TABLE_NAME}` (`vehicleId`, `odometer`)"
+          },
+          {
+            "name": "index_fill_up_vehicleId_date",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fill_up_vehicleId_date` ON `${TABLE_NAME}` (`vehicleId`, `date`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "vehicle",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "vehicleId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "expense",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `vehicleId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `odometer` REAL, `category` TEXT NOT NULL, `totalCost` REAL NOT NULL, `note` TEXT, FOREIGN KEY(`vehicleId`) REFERENCES `vehicle`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "odometer",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalCost",
+            "columnName": "totalCost",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_expense_vehicleId_date",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_expense_vehicleId_date` ON `${TABLE_NAME}` (`vehicleId`, `date`)"
+          },
+          {
+            "name": "index_expense_vehicleId_category",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "category"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_expense_vehicleId_category` ON `${TABLE_NAME}` (`vehicleId`, `category`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "vehicle",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "vehicleId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '605459694caf153ab43830e705766b4b')"
+    ]
+  }
+}
