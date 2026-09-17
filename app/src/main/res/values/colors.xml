@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Only the two colours the platform needs before Compose starts. Every other
+      colour in the app lives in ui/theme/Color.kt as a semantic token.
+    -->
+    <color name="brand_yellow">#F5D211</color>
+    <color name="ink">#0D1117</color>
+</resources>
