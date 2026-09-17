@@ -49,6 +49,18 @@ class NumberInputTest {
     }
 
     @Test
+    fun `malformed grouping is rejected rather than silently concatenated`() {
+        // Three fields typed into one by accident. Reading this as
+        // 847,101,465,210 would be far worse than refusing it.
+        assertThat(parseNumber("8471014.652.10", NumberKind.ODOMETER)).isNull()
+        assertThat(parseNumber("1,23,456", NumberKind.ODOMETER)).isNull()
+        assertThat(parseNumber("12,3456,789", NumberKind.ODOMETER)).isNull()
+        // Well-formed grouping still works.
+        assertThat(parseNumber("1,234,567", NumberKind.ODOMETER)).isEqualTo(1234567.0)
+        assertThat(parseNumber("12,345,678", NumberKind.ODOMETER)).isEqualTo(12345678.0)
+    }
+
+    @Test
     fun `an odometer with a genuine decimal is not mistaken for grouping`() {
         assertThat(parseNumber("48210.5", NumberKind.ODOMETER)).isEqualTo(48210.5)
         assertThat(parseNumber("48210,5", NumberKind.ODOMETER)).isEqualTo(48210.5)

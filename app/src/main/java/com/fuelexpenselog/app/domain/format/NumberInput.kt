@@ -63,7 +63,13 @@ fun parseNumber(raw: String, kind: NumberKind): Double? {
             val sep = if (dots > 0) '.' else ','
             val count = if (dots > 0) dots else commas
             if (count > 1) {
-                // "1,234,567" - repeated separators can only be grouping.
+                // "1,234,567" - repeated separators can only be grouping, but
+                // only if the groups are actually groups. Without this check
+                // "8471014.652.10" would silently become 847,101,465,210.
+                val groups = normalised.split(sep)
+                val wellFormed = groups.first().length in 1..3 &&
+                    groups.drop(1).all { it.length == 3 }
+                if (!wellFormed) return null
                 normalised.filter { it != sep }
             } else {
                 val idx = normalised.indexOf(sep)

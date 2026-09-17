@@ -39,6 +39,8 @@ import com.fuelexpenselog.app.ui.motion.motionTween
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
 
+enum class FigureSize { Large, Medium, Small }
+
 /**
  * No box. Label above, value at figure scale, a single underline beneath:
  * 2dp ink when focused, 1dp otherwise.
@@ -56,6 +58,7 @@ fun FigureInput(
     placeholder: String? = null,
     imeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Decimal,
+    figureSize: FigureSize = FigureSize.Large,
 ) {
     val colors = FuelTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
@@ -72,7 +75,13 @@ fun FigureInput(
         label = "underlineHeight",
     )
 
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    val textStyle = when (figureSize) {
+        FigureSize.Large -> FuelTheme.type.figureL
+        FigureSize.Medium -> FuelTheme.type.figureM
+        FigureSize.Small -> FuelTheme.type.bodyRegular
+    }
+
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         Row(verticalAlignment = Alignment.Bottom) {
             BasicTextField(
@@ -89,7 +98,7 @@ fun FigureInput(
                         )
                     }
                     .padding(bottom = 10.dp),
-                textStyle = FuelTheme.type.figureL.copy(color = colors.ink),
+                textStyle = textStyle.copy(color = colors.ink),
                 // BasicTextField draws a 2dp caret, which IS the design's
                 // "2px yellow bar" - no custom caret needed.
                 cursorBrush = SolidColor(colors.yellow),
@@ -104,7 +113,7 @@ fun FigureInput(
                         if (state.text.isEmpty() && placeholder != null) {
                             Text(
                                 text = placeholder,
-                                style = FuelTheme.type.figureL,
+                                style = textStyle,
                                 color = colors.strongHairline,
                             )
                         }
@@ -135,6 +144,7 @@ fun ToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    hint: String? = null,
 ) {
     val colors = FuelTheme.colors
 
@@ -154,7 +164,7 @@ fun ToggleRow(
             .fillMaxWidth()
             .heightIn(min = Dimens.minTouchTarget)
             .background(background)
-            .border(Dimens.hairline, if (checked) colors.ink else colors.frame)
+            .border(Dimens.hairline, colors.ink)
             .toggleable(
                 value = checked,
                 role = Role.Switch,
@@ -164,11 +174,23 @@ fun ToggleRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = FuelTheme.type.body,
-            color = if (checked) colors.onYellow else colors.ink,
-        )
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = label,
+                style = FuelTheme.type.body,
+                color = if (checked) colors.onYellow else colors.ink,
+            )
+            if (hint != null) {
+                Text(
+                    text = hint,
+                    style = FuelTheme.type.meta,
+                    color = if (checked) colors.onYellowSecondary else colors.bodyGrey,
+                )
+            }
+        }
         Box(
             Modifier
                 .size(Dimens.toggleWidth, Dimens.toggleHeight)
