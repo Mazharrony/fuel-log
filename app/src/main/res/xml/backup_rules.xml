@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Room runs in WAL mode. Backing up only the .db file can capture an
-  inconsistent snapshot, so the -wal and -shm siblings go too.
+  Room runs in WAL mode. Backing up only the .db file can capture a snapshot that is
+  missing the user's most recent entries, so the -wal and -shm siblings go too.
 -->
 <full-backup-content>
     <include domain="database" path="fuel-log.db" />

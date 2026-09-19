@@ -3,25 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      THE PRODUCT CLAIM, IN ONE PLACE.
+      The xmlns:tools declaration above is load-bearing. Without it every tools:node
+      below is silently ignored and the removals do nothing.
 
-      This app declares no permissions. These removals make the manifest merger
-      strip the network permissions even if a transitive dependency declares
-      them, so a library update cannot silently invalidate the claim that
-      nothing can leave the device.
-
-      Verified on every release by tools/release-check.ps1 - the expected output
-      of a permission dump is nothing at all.
+      These entries remove permissions that a transitive dependency might contribute.
+      Listing a permission the app never declares is harmless - it acts purely as a
+      ratchet, and app/build.gradle.kts asserts against the merged result.
     -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" tools:node="remove" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
 
     <!--
-      androidx.core declares a signature-level permission of its own for
-      ContextCompat.registerReceiver. It grants nothing and is scoped to this
-      app, but it still shows up in a permission dump - and "check the
-      permission list yourself" is the entire pitch, so the list must be empty.
-      This app registers no broadcast receivers, so removing it is safe.
+      androidx.core declares this signature-level permission for ContextCompat's receiver
+      registration. It grants nothing, but it shows up in a permission dump, and "check the
+      permission list yourself" is this app's entire pitch. Safe to drop: the app registers
+      no dynamic broadcast receivers.
     -->
     <permission
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
@@ -30,27 +30,40 @@
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         tools:node="remove" />
 
+    <!--
+      The only two permissions this app ships with.
+
+      POST_NOTIFICATIONS is requested at the moment the user turns reminders on in
+      Settings, never at launch. RECEIVE_BOOT_COMPLETED is not a runtime permission and
+      never prompts; it exists solely to re-arm the reminder alarm after a reboot, because
+      a reminder that silently stops working after a restart is worse than no reminder.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
-        android:name=".FuelLogApplication"
+        android:name=".FuelLogApp"
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FuelLog"
-        android:enableOnBackInvokedCallback="true">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="true"
+        android:theme="@style/Theme.FuelLog">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.FuelLog.Starting">
+            android:theme="@style/Theme.FuelLog">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

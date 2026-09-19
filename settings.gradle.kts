@@ -6,10 +6,10 @@ pluginManagement {
     }
 }
 
+// The JetBrains Runtime that ships with the IDE has javac but no jlink, which AGP's
+// JdkImageTransform requires. This provisions a complete JDK 17 for the build.
+// It is a settings plugin: it never reaches the APK or the merged manifest.
 plugins {
-    // The JetBrains Runtime on this machine has javac but no jlink, which AGP's
-    // JdkImageTransform requires. This provisions a complete JDK 17 for the
-    // build. It is a settings plugin: it never reaches the APK or the manifest.
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
@@ -22,5 +22,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Fuel Log"
-
 include(":app")
+include(":core:domain")
+include(":core:csv")
