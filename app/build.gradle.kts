@@ -4,6 +4,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+// Configured through the Room Gradle plugin rather than a KSP compiler argument: this
+// project path contains spaces, and passing schemaLocation through compiler-option encoding
+// mangles it silently.
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -81,6 +90,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -96,6 +109,7 @@ dependencies {
     testImplementation(libs.androidx.test.core.ktx)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.room.testing)
 }
 
 // ---------------------------------------------------------------------------------------
