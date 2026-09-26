@@ -467,4 +467,90 @@
         <item quantity="one">%s reminder overdue</item>
         <item quantity="other">%s reminders overdue</item>
     </plurals>
+
+    <!-- Import -->
+    <string name="import_title">Import CSV</string>
+    <string name="import_reading">Reading the file…</string>
+    <string name="import_failed_unreadable">This file could not be read. Choose it again from Settings.</string>
+    <string name="import_failed_large">This file is over 20 MB, far bigger than any fuel log. Choose the export itself.</string>
+    <string name="import_failed_empty">This file has no rows to import.</string>
+    <string name="import_preview">Import preview · %1$s</string>
+    <string name="import_format">Format</string>
+    <string name="import_format_fuel_log">This app\'s export</string>
+    <string name="import_format_fuelio">Fuelio</string>
+    <string name="import_format_acar">aCar</string>
+    <string name="import_format_drivvo">Drivvo</string>
+    <string name="import_format_generic">A spreadsheet: check the columns</string>
+    <string name="import_source_spreadsheet">Spreadsheet</string>
+    <string name="import_text">Text</string>
+    <string name="import_text_utf8">UTF-8</string>
+    <string name="import_text_utf16">UTF-16</string>
+    <string name="import_text_1252">Windows-1252 (Western)</string>
+    <string name="import_dates">Date format</string>
+    <string name="import_dates_ask">Asked below</string>
+    <string name="import_rows">Rows read</string>
+    <string name="import_rows_value">%1$s of %2$s</string>
+    <string name="import_date_question">In this file, %1$s is</string>
+    <string name="import_dates_first">Say which date that is, above, and the rows appear here.</string>
+    <string name="import_columns">Columns</string>
+    <string name="import_column_none">Not in this file</string>
+    <string name="import_column_title">%1$s is in</string>
+    <string name="import_column_sample">%1$s · e.g. %2$s</string>
+    <string name="import_field_date">Date</string>
+    <string name="import_field_odometer">Odometer</string>
+    <string name="import_field_volume">Volume</string>
+    <string name="import_field_total">Total paid</string>
+    <string name="import_field_unit_price">Price per unit</string>
+    <string name="import_field_full">Full tank</string>
+    <string name="import_field_station">Station</string>
+    <string name="import_field_note">Note</string>
+    <string name="import_distance">Distances in this file</string>
+    <string name="import_volume">Volumes in this file</string>
+    <string name="import_into">Import into</string>
+    <string name="import_rows_for">Rows for</string>
+    <string name="import_filter">%1$s · %2$s</string>
+    <string name="import_filter_all">All</string>
+    <string name="import_filter_warnings">Warnings</string>
+    <string name="import_filter_duplicates">Duplicates</string>
+    <string name="import_filter_errors">Errors</string>
+    <string name="import_filter_empty">Nothing here.</string>
+    <string name="import_duplicate">Already in the app</string>
+    <string name="import_line">Line %1$s</string>
+    <string name="import_partial">partial</string>
+    <string name="import_missed">after a missed fill-up</string>
+    <string name="import_issue_date">No date that reads in this file\'s format</string>
+    <string name="import_issue_volume">No volume, or one that cannot be read</string>
+    <string name="import_issue_amount">No amount, or one that cannot be read</string>
+    <string name="import_issue_odometer">An odometer reading that cannot be read</string>
+    <string name="import_issue_value">A unit or currency this version does not know</string>
+    <string name="import_issue_no_odometer">No odometer, so no figure comes from this one</string>
+    <string name="import_issue_zero">A volume of zero</string>
+    <string name="import_issue_future">Dated in the future</string>
+    <string name="import_issue_category">Category not recognised: filed as Other</string>
+    <plurals name="import_n">
+        <item quantity="one">Import %s entry</item>
+        <item quantity="other">Import %s entries</item>
+    </plurals>
+    <plurals name="import_done">
+        <item quantity="one">Imported %1$s entry into %2$s. Settings can undo it.</item>
+        <item quantity="other">Imported %1$s entries into %2$s. Settings can undo it.</item>
+    </plurals>
+
+    <!-- Undoing an import, from Settings -->
+    <string name="settings_undo_import">Undo import: %1$s</string>
+    <plurals name="settings_undo_import_detail">
+        <item quantity="one">%1$s · %2$s row · %3$s</item>
+        <item quantity="other">%1$s · %2$s rows · %3$s</item>
+    </plurals>
+    <string name="undo_import_title">Undo this import?</string>
+    <string name="undo_import_body">Everything it added is removed. Entries typed in by hand stay.</string>
+    <string name="undo_import_confirm">Undo import</string>
+    <plurals name="undo_import_done">
+        <item quantity="one">Removed %s entry.</item>
+        <item quantity="other">Removed %s entries.</item>
+    </plurals>
+
+    <!-- First run -->
+    <string name="onboarding_import_prompt">Already logging elsewhere?</string>
+    <string name="onboarding_import_link">Import a CSV</string>
 </resources>

@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fuelexpenselog.app.R
 import com.fuelexpenselog.app.backup.BackupReader
+import com.fuelexpenselog.app.data.repo.ImportBatch
 import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
 import com.fuelexpenselog.app.ui.common.ConfirmDialog
@@ -46,9 +48,12 @@ import com.fuelexpenselog.app.ui.onboarding.CountryList
 import com.fuelexpenselog.app.ui.onboarding.countryName
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
+import com.fuelexpenselog.csv.imprt.DialectId
+import com.fuelexpenselog.domain.time.CivilDate
 import com.fuelexpenselog.domain.unit.ConsumptionFormat
 import com.fuelexpenselog.domain.unit.DistanceUnit
 import com.fuelexpenselog.domain.unit.EnergyUnit
+import java.text.NumberFormat
 
 /** What the "Your data" rows do. Null means the row is not available in this build. */
 class DataActions(
@@ -63,20 +68,26 @@ fun SettingsRoute(
     onBack: () -> Unit,
     onCollects: () -> Unit,
     onExport: () -> Unit,
-    onImport: (() -> Unit)? = null,
+    onImport: (uri: String) -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = FuelViewModels.Factory),
     dataViewModel: DataViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dataStatus by dataViewModel.status.collectAsStateWithLifecycle()
+    val imports by dataViewModel.imports.collectAsStateWithLifecycle()
     var pendingRestore by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var pendingUndo by rememberSaveable { mutableStateOf<Long?>(null) }
 
-    // The system pickers: the user chooses where a backup goes and which one comes back.
+    // The system pickers: the user chooses where a backup goes, which one comes back, and
+    // which file to import. Nothing else of their storage is ever visible to the app.
     val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
         uri?.let(dataViewModel::backup)
     }
     val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         pendingRestore = uri
+    }
+    val import = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { onImport(it.toString()) }
     }
 
     SettingsScreen(
@@ -92,9 +103,27 @@ fun SettingsRoute(
             onExport = onExport,
             onBackup = { backup.launch(dataViewModel.backupName()) },
             onRestore = { restore.launch(arrayOf("*/*")) },
-            onImport = onImport,
+            // Any type: a CSV arrives as text/csv, text/plain or octet-stream depending on
+            // where it was saved, and a file that is not one says so in the preview.
+            onImport = { import.launch(arrayOf("*/*")) },
         ),
+        imports = imports,
+        onUndoImport = { pendingUndo = it.id },
     )
+
+    imports.firstOrNull { it.first.id == pendingUndo }?.let { (batch, _) ->
+        ConfirmDialog(
+            title = stringResource(R.string.undo_import_title),
+            body = stringResource(R.string.undo_import_body),
+            confirm = stringResource(R.string.undo_import_confirm),
+            danger = true,
+            onConfirm = {
+                pendingUndo = null
+                dataViewModel.undoImport(batch)
+            },
+            onDismiss = { pendingUndo = null },
+        )
+    }
 
     pendingRestore?.let { uri ->
         ConfirmDialog(
@@ -123,6 +152,11 @@ private fun DataStatusDialog(status: DataStatus, onDismiss: () -> Unit) {
             BackupReader.Refusal.NOT_A_BACKUP -> stringResource(R.string.restore_not_backup)
         }
         is DataStatus.Failed -> stringResource(if (status.restoring) R.string.restore_failed else R.string.backup_failed, status.message)
+        is DataStatus.Undone -> pluralStringResource(
+            R.plurals.undo_import_done,
+            status.removed,
+            NumberFormat.getIntegerInstance(LocalFormatters.current.locale).format(status.removed),
+        )
     }
     AlertDialog(
         onDismissRequest = { if (status != DataStatus.Working) onDismiss() },
@@ -148,6 +182,8 @@ fun SettingsScreen(
     onRegion: (String) -> Unit,
     onCollects: () -> Unit,
     data: DataActions,
+    imports: List<Pair<ImportBatch, CivilDate>> = emptyList(),
+    onUndoImport: (ImportBatch) -> Unit = {},
 ) {
     val f = LocalFormatters.current
     val colors = FuelTheme.colors
@@ -228,6 +264,19 @@ fun SettingsScreen(
             DataRow(stringResource(R.string.settings_backup), stringResource(R.string.settings_backup_hint), data.onBackup)
             DataRow(stringResource(R.string.settings_restore), stringResource(R.string.settings_restore_hint), data.onRestore)
             DataRow(stringResource(R.string.settings_import), stringResource(R.string.settings_import_hint), data.onImport)
+            imports.forEach { (batch, day) ->
+                DataRow(
+                    stringResource(R.string.settings_undo_import, batch.fileName),
+                    pluralStringResource(
+                        R.plurals.settings_undo_import_detail,
+                        batch.rowCount,
+                        stringResource(importSourceLabel(batch.source)),
+                        NumberFormat.getIntegerInstance(f.locale).format(batch.rowCount),
+                        f.date.medium(day),
+                    ),
+                    onClick = { onUndoImport(batch) },
+                )
+            }
             DataRow(stringResource(R.string.settings_collects), stringResource(R.string.settings_collects_hint), onCollects)
 
             Text(
@@ -252,6 +301,15 @@ fun SettingsScreen(
             onDismiss = { pickRegion = false },
         )
     }
+}
+
+/** The app an import came from, as stored on its batch. */
+private fun importSourceLabel(source: String): Int = when (source) {
+    DialectId.FUEL_LOG.name -> R.string.import_format_fuel_log
+    DialectId.FUELIO.name -> R.string.import_format_fuelio
+    DialectId.ACAR.name -> R.string.import_format_acar
+    DialectId.DRIVVO.name -> R.string.import_format_drivvo
+    else -> R.string.import_source_spreadsheet
 }
 
 private fun shortFormatLabel(format: ConsumptionFormat): Int = when (format) {

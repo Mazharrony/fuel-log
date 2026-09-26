@@ -1,0 +1,18 @@
+## Vehicle
+"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank1","FuelUnitTank2","FuelConsumptionTank1","FuelConsumptionTank2"
+"Golf","","0","0","0","yyyy-MM-dd","","","","VW","Golf","2019","1","100","0","1","50.0","0.0","0","0","0","0"
+## Log
+"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"
+"2026-01-04","48200","40.0","1","60.00","0.0","0.0","0.0","Berlin","","0","1","110","1.500","0","0.0","1","0.0",""
+"2026-01-18","48700","41.5","1","62.00","8.3","0.0","0.0","Berlin","","0","1","110","1.494","0","0.0","2","0.0",""
+"2026-02-01","49150","20.0","0","31.00","0.0","0.0","0.0","Potsdam","half, then home","0","1","110","1.550","0","0.0","3","0.0",""
+"2026-02-15","49600","38.0","1","58.90","0.0","0.0","0.0","Berlin","","1","1","110","1.550","0","0.0","4","0.0",""
+## CostCategories
+"CostTypeID","Name","priority","color"
+"1","Service","0","#FF0000"
+"2","Insurance","0","#00FF00"
+"3","Parking","0","#0000FF"
+## Costs
+"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"
+"Oil and filter","2026-01-20","48750","1","5W-30","89.90","0","0","1","0","2011-01-01","0","0","0","0","5"
+"Annual policy","2026-02-02","0","2","","420.00","0","0","1","0","2011-01-01","0","0","0","0","6"

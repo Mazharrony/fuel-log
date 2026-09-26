@@ -2,6 +2,7 @@ package com.fuelexpenselog.app.data.repo
 
 import com.fuelexpenselog.app.data.db.entity.ExpenseEntity
 import com.fuelexpenselog.app.data.db.entity.FillUpEntity
+import com.fuelexpenselog.app.data.db.entity.ImportBatchEntity
 import com.fuelexpenselog.app.data.db.entity.OdometerSegmentEntity
 import com.fuelexpenselog.app.data.db.entity.VehicleEntity
 import com.fuelexpenselog.domain.consumption.DeclaredSegment
@@ -148,7 +149,25 @@ fun FillUpEntity.toDomain(): FillUp {
 private fun defaultUnitFor(kind: EnergyKind) =
     if (kind == EnergyKind.LIQUID) EnergyUnit.LITRE else EnergyUnit.KWH
 
-fun FillUp.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis): FillUpEntity {
+/** One import, as Settings lists it for undoing. */
+data class ImportBatch(val id: Long, val source: String, val fileName: String, val importedAtMillis: Long, val rowCount: Int)
+
+fun ImportBatchEntity.toDomain(): ImportBatch = ImportBatch(id, source, fileName, importedAtMillis, rowCount)
+
+/**
+ * Where an imported row came from: the source, the batch that undoes it, and its fingerprint
+ * from the file. An edit keeps it, so "Undo import" still takes the row away and re-importing
+ * the file still recognises it.
+ */
+data class ImportStamp(val source: String, val batchId: Long, val rowHash: String)
+
+fun FillUpEntity.importStamp(): ImportStamp? =
+    if (importSource != null && importBatchId != null && importRowHash != null) ImportStamp(importSource, importBatchId, importRowHash) else null
+
+fun ExpenseEntity.importStamp(): ImportStamp? =
+    if (importSource != null && importBatchId != null && importRowHash != null) ImportStamp(importSource, importBatchId, importRowHash) else null
+
+fun FillUp.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis, import: ImportStamp? = null): FillUpEntity {
     val currency = total?.currency ?: unitPrice?.currency ?: "USD"
     require(total != null || unitPrice != null) {
         "A fill-up must carry a total or a unit price; the other is derived at display time."
@@ -172,9 +191,9 @@ fun FillUp.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis): FillUpE
         fuelGrade = fuelGrade,
         paymentMethod = paymentMethod,
         note = note,
-        importSource = null,
-        importBatchId = null,
-        importRowHash = null,
+        importSource = import?.source,
+        importBatchId = import?.batchId,
+        importRowHash = import?.rowHash,
         createdAtMillis = createdAtMillis,
         updatedAtMillis = nowMillis,
     )
@@ -200,7 +219,7 @@ fun ExpenseEntity.toDomain(): Expense {
     )
 }
 
-fun Expense.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis): ExpenseEntity = ExpenseEntity(
+fun Expense.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis, import: ImportStamp? = null): ExpenseEntity = ExpenseEntity(
     id = id,
     vehicleId = vehicleId,
     occurredLocalDate = date.value,
@@ -213,9 +232,9 @@ fun Expense.toEntity(nowMillis: Long, createdAtMillis: Long = nowMillis): Expens
     vendor = vendor,
     note = note,
     reminderId = reminderId,
-    importSource = null,
-    importBatchId = null,
-    importRowHash = null,
+    importSource = import?.source,
+    importBatchId = import?.batchId,
+    importRowHash = import?.rowHash,
     createdAtMillis = createdAtMillis,
     updatedAtMillis = nowMillis,
 )

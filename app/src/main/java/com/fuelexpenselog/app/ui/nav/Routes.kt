@@ -16,6 +16,13 @@ object Routes {
     const val SETTINGS = "settings"
     const val COLLECTS = "settings/collects"
 
+    /** The picked document, as a URI string. */
+    const val ARG_URI = "uri"
+
+    /** [ARG_VEHICLE] 0 imports into the vehicle used last; the preview can change it. */
+    const val IMPORT = "import?$ARG_URI={$ARG_URI}&$ARG_VEHICLE={$ARG_VEHICLE}"
+    fun import(uri: String, vehicleId: Long = 0) = "import?$ARG_URI=${android.net.Uri.encode(uri)}&$ARG_VEHICLE=$vehicleId"
+
     /** [ARG_VEHICLE] 0 exports every vehicle; [ARG_MONTH] 0 offers no single month. */
     const val EXPORT = "export?$ARG_VEHICLE={$ARG_VEHICLE}&$ARG_MONTH={$ARG_MONTH}"
     fun export(vehicleId: Long = 0, month: Int = 0) = "export?$ARG_VEHICLE=$vehicleId&$ARG_MONTH=$month"

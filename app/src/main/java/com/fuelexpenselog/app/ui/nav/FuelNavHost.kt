@@ -18,6 +18,7 @@ import com.fuelexpenselog.app.ui.entry.FillUpEditorRoute
 import com.fuelexpenselog.app.ui.export.ExportRoute
 import com.fuelexpenselog.app.ui.garage.GarageRoute
 import com.fuelexpenselog.app.ui.history.HistoryRoute
+import com.fuelexpenselog.app.ui.importflow.ImportRoute
 import com.fuelexpenselog.app.ui.months.MonthDetailRoute
 import com.fuelexpenselog.app.ui.months.MonthsRoute
 import com.fuelexpenselog.app.ui.onboarding.OnboardingRoute
@@ -79,11 +80,19 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
         popExitTransition = { fadeThroughOut },
     ) {
         composable(Routes.ONBOARDING) {
-            OnboardingRoute(onDone = {
+            val toGarage = {
                 navController.navigate(Routes.GARAGE) {
                     popUpTo(Routes.ONBOARDING) { inclusive = true }
                 }
-            })
+            }
+            OnboardingRoute(
+                onDone = toGarage,
+                // Garage first, so back from the import lands at home rather than in first run.
+                onImport = { uri, vehicleId ->
+                    toGarage()
+                    navController.navigate(Routes.import(uri, vehicleId))
+                },
+            )
         }
         composable(Routes.GARAGE) {
             GarageRoute(
@@ -99,9 +108,14 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
                 onBack = back,
                 onCollects = { navController.navigate(Routes.COLLECTS) },
                 onExport = { navController.navigate(Routes.export()) },
+                onImport = { uri -> navController.navigate(Routes.import(uri)) },
             )
         }
         composable(Routes.COLLECTS) { CollectsScreen(onBack = back) }
+        composable(
+            Routes.IMPORT,
+            arguments = listOf(navArgument(Routes.ARG_URI) { type = NavType.StringType }, vehicleArg),
+        ) { ImportRoute(onDone = back) }
         composable(Routes.EXPORT, arguments = listOf(vehicleArg, monthArg)) { ExportRoute(onBack = back) }
 
         composable(Routes.VEHICLE_NEW) { VehicleEditorRoute(onDone = back) }

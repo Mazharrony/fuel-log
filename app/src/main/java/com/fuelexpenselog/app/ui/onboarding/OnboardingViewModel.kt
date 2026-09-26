@@ -122,7 +122,7 @@ class OnboardingViewModel(
      * currency goes on the vehicle; the unit set chosen here goes on both the vehicle and the
      * app's defaults for the next one.
      */
-    fun finish() {
+    fun finish(importUri: String? = null) {
         val s = current().takeIf { it.canFinish } ?: return
         viewModelScope.launch {
             val region = s.region
@@ -151,9 +151,16 @@ class OnboardingViewModel(
             )
             prefs.lastVehicleId = id
             prefs.onboardingDone = true
+            importUri?.let { _handoff.value = ImportHandoff(it, id) }
             done.value = true
         }
     }
+
+    /** "Import a CSV": the first vehicle is created as usual, then its history comes in. */
+    data class ImportHandoff(val uri: String, val vehicleId: Long)
+
+    private val _handoff = MutableStateFlow<ImportHandoff?>(null)
+    val handoff: StateFlow<ImportHandoff?> = _handoff
 
     private companion object {
         const val KEY_STEP = "onboarding_step"

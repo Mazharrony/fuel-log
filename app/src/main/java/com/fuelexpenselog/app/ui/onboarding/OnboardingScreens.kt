@@ -1,8 +1,11 @@
 package com.fuelexpenselog.app.ui.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -24,11 +27,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -54,16 +61,28 @@ import com.fuelexpenselog.app.ui.theme.FuelTheme
 @Composable
 fun OnboardingRoute(
     onDone: () -> Unit,
+    onImport: (uri: String, vehicleId: Long) -> Unit,
     viewModel: OnboardingViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(state.done) { if (state.done) onDone() }
+    val handoff by viewModel.handoff.collectAsStateWithLifecycle()
+    LaunchedEffect(state.done, handoff) {
+        if (state.done) handoff?.let { onImport(it.uri, it.vehicleId) } ?: onDone()
+    }
     BackHandler(enabled = state.step != OnboardingStep.COUNTRY) { viewModel.back() }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.finish(importUri = it.toString()) }
+    }
 
     when (state.step) {
         OnboardingStep.COUNTRY -> CountryScreen(state, viewModel::onCountry, viewModel::next)
         OnboardingStep.UNITS -> UnitsScreen(state, viewModel::onPreset, viewModel::next)
-        OnboardingStep.VEHICLE -> FirstVehicleScreen(state, viewModel::onName, viewModel::finish)
+        OnboardingStep.VEHICLE -> FirstVehicleScreen(
+            state = state,
+            onName = viewModel::onName,
+            onStart = { viewModel.finish() },
+            onImport = { picker.launch(arrayOf("*/*")) },
+        )
     }
 }
 
@@ -258,7 +277,12 @@ private fun PresetRow(preset: UnitPreset, selected: Boolean, format: String, onC
 
 /** 04: the first vehicle, and then out of the way. No tutorial and no account step. */
 @Composable
-fun FirstVehicleScreen(state: OnboardingUiState, onName: (String) -> Unit, onStart: () -> Unit) {
+fun FirstVehicleScreen(
+    state: OnboardingUiState,
+    onName: (String) -> Unit,
+    onStart: () -> Unit,
+    onImport: () -> Unit = {},
+) {
     val f = LocalFormatters.current
     FuelScreen(Modifier.imePadding()) {
         Column(
@@ -293,11 +317,45 @@ fun FirstVehicleScreen(state: OnboardingUiState, onName: (String) -> Unit, onSta
                 Note(stringResource(R.string.onboarding_privacy))
             }
         }
+        ImportLink(enabled = state.canFinish, onClick = onImport)
         PrimaryButton(
             stringResource(R.string.onboarding_start),
             onStart,
             enabled = state.canFinish,
             modifier = Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, top = 12.dp, bottom = 22.dp),
+        )
+    }
+}
+
+/**
+ * "Already logging elsewhere? Import a CSV": an inline link with the handoff's yellow 2dp
+ * underline under ink text. Like Start logging, it needs the vehicle's name first, since that
+ * vehicle is where the history goes.
+ */
+@Composable
+private fun ImportLink(enabled: Boolean, onClick: () -> Unit) {
+    val colors = FuelTheme.colors
+    val underline = colors.primary
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = Dimens.minTouchTarget)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(horizontal = Dimens.gutter, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Text(stringResource(R.string.onboarding_import_prompt), style = FuelTheme.type.meta, color = colors.textSecondary)
+        Text(
+            stringResource(R.string.onboarding_import_link),
+            style = FuelTheme.type.meta.copy(fontWeight = FontWeight.SemiBold),
+            color = if (enabled) colors.textPrimary else colors.textSecondary,
+            modifier = Modifier.drawBehind {
+                if (enabled) {
+                    val stroke = 2.dp.toPx()
+                    drawRect(underline, topLeft = Offset(0f, size.height - stroke), size = Size(size.width, stroke))
+                }
+            },
         )
     }
 }

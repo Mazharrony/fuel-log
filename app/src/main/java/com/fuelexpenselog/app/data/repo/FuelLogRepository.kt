@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.fuelexpenselog.app.data.db.FuelLogDatabase
 import com.fuelexpenselog.app.data.db.entity.ImportBatchEntity
 import com.fuelexpenselog.app.data.db.entity.ReminderCompletionEntity
+import com.fuelexpenselog.csv.imprt.ExistingEntries
 import com.fuelexpenselog.domain.consumption.ConsumptionEngine
 import com.fuelexpenselog.domain.consumption.ConsumptionResult
 import com.fuelexpenselog.domain.consumption.DeclaredSegment
@@ -22,6 +23,7 @@ import com.fuelexpenselog.domain.unit.EnergyKind
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -144,7 +146,7 @@ class FuelLogRepository(
     suspend fun updateFillUp(fillUp: FillUp) {
         requireEditable(fillUp)
         val existing = fillUps.byId(fillUp.id) ?: return
-        fillUps.update(fillUp.toEntity(now(), createdAtMillis = existing.createdAtMillis))
+        fillUps.update(fillUp.toEntity(now(), createdAtMillis = existing.createdAtMillis, import = existing.importStamp()))
     }
 
     suspend fun deleteFillUp(id: Long) {
@@ -156,7 +158,7 @@ class FuelLogRepository(
     suspend fun updateExpense(expense: Expense) {
         requireEditable(expense)
         val existing = expenses.byId(expense.id) ?: return
-        expenses.update(expense.toEntity(now(), createdAtMillis = existing.createdAtMillis))
+        expenses.update(expense.toEntity(now(), createdAtMillis = existing.createdAtMillis, import = existing.importStamp()))
     }
 
     suspend fun deleteExpense(id: Long) {
@@ -294,19 +296,56 @@ class FuelLogRepository(
     suspend fun allFillUps() = fillUps.all().map { it.toDomain() }
     suspend fun allExpenses() = expenses.all().map { it.toDomain() }
 
-    suspend fun recordImport(source: String, fileName: String, rowCount: Int, vehicleId: Long?): Long =
-        batches.insert(
+    /**
+     * An import, all of it or none: the batch row first, so every entry can name it, then the
+     * entries, each stamped with its source, its batch and its fingerprint from the file.
+     * Undo removes the batch as one unit.
+     */
+    suspend fun commitImport(
+        source: String,
+        fileName: String,
+        vehicleId: Long,
+        fuel: List<Pair<FillUp, String>>,
+        costs: List<Pair<Expense, String>>,
+    ): Long = database().withTransaction {
+        val batchId = batches.insert(
             ImportBatchEntity(
                 source = source,
                 fileName = fileName,
                 importedAtMillis = now(),
-                rowCount = rowCount,
+                rowCount = fuel.size + costs.size,
                 vehicleId = vehicleId,
             ),
         )
+        fillUps.insertAll(
+            fuel.map { (f, hash) -> f.copy(id = 0, vehicleId = vehicleId).toEntity(now(), import = ImportStamp(source, batchId, hash)) },
+        )
+        expenses.insertAll(
+            costs.map { (e, hash) -> e.copy(id = 0, vehicleId = vehicleId).toEntity(now(), import = ImportStamp(source, batchId, hash)) },
+        )
+        batchId
+    }
+
+    /** Newest first, for Settings to offer undoing. */
+    fun observeImportBatches(): Flow<List<ImportBatch>> =
+        batches.observeAll().map { list -> list.map { it.toDomain() } }
 
     /** Undo an entire import in one go. */
     suspend fun undoImport(batchId: Long): Int = batches.undo(batchId, fillUps, expenses)
+
+    /**
+     * Everything a vehicle already holds, for an import to find what is already there: every
+     * row's own fingerprint, plus the one it was imported with, which survives an edit.
+     */
+    suspend fun existingEntries(vehicleId: Long): ExistingEntries {
+        val fuel = fillUps.observeForVehicle(vehicleId).first()
+        val costs = expenses.observeForVehicle(vehicleId).first()
+        return ExistingEntries(
+            fillUps = fuel.map { it.toDomain() },
+            expenses = costs.map { it.toDomain() },
+            storedHashes = fuel.mapNotNull { it.importRowHash } + costs.mapNotNull { it.importRowHash },
+        )
+    }
 
     private fun maxOfNullable(a: Long?, b: Long?): Long? = when {
         a == null -> b
