@@ -1,5 +1,6 @@
 package com.fuelexpenselog.app.ui.settings
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,12 +23,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fuelexpenselog.app.R
@@ -40,8 +43,10 @@ import com.fuelexpenselog.app.ui.common.CurrencyField
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
 import com.fuelexpenselog.app.ui.common.NavHeader
+import com.fuelexpenselog.app.ui.common.Note
 import com.fuelexpenselog.app.ui.common.SectionLabel
 import com.fuelexpenselog.app.ui.common.Segmented
+import com.fuelexpenselog.app.ui.common.ToggleRow
 import com.fuelexpenselog.app.ui.common.longLabel
 import com.fuelexpenselog.app.ui.common.topHairline
 import com.fuelexpenselog.app.ui.onboarding.CountryList
@@ -71,12 +76,27 @@ fun SettingsRoute(
     onImport: (uri: String) -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = FuelViewModels.Factory),
     dataViewModel: DataViewModel = viewModel(factory = FuelViewModels.Factory),
+    notifyViewModel: NotifyViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dataStatus by dataViewModel.status.collectAsStateWithLifecycle()
     val imports by dataViewModel.imports.collectAsStateWithLifecycle()
+    val notify by notifyViewModel.state.collectAsStateWithLifecycle()
     var pendingRestore by rememberSaveable { mutableStateOf<Uri?>(null) }
     var pendingUndo by rememberSaveable { mutableStateOf<Long?>(null) }
+    var notifyDenied by rememberSaveable { mutableStateOf(false) }
+
+    // The system's answer can change while the app is away: ask again on every return.
+    LifecycleResumeEffect(Unit) {
+        notifyViewModel.refresh()
+        onPauseOrDispose { }
+    }
+    // Asked at the toggle and nowhere else; a refusal leaves reminders off, as the user said.
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) notifyViewModel.turnOn() else notifyDenied = true
+    }
+    val openNotificationSettings = { context.startActivity(notifyViewModel.settingsIntent()) }
 
     // The system pickers: the user chooses where a backup goes, which one comes back, and
     // which file to import. Nothing else of their storage is ever visible to the app.
@@ -109,7 +129,30 @@ fun SettingsRoute(
         ),
         imports = imports,
         onUndoImport = { pendingUndo = it.id },
+        notify = notify,
+        onNotify = { on ->
+            when {
+                !on -> notifyViewModel.turnOff()
+                notifyViewModel.needsPermission -> permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else -> notifyViewModel.turnOn()
+            }
+        },
+        onAllowNotifications = openNotificationSettings,
     )
+
+    if (notifyDenied) {
+        ConfirmDialog(
+            title = stringResource(R.string.notify_denied_title),
+            body = stringResource(R.string.notify_denied_body),
+            confirm = stringResource(R.string.notify_open_settings),
+            dismiss = stringResource(R.string.notify_not_now),
+            onConfirm = {
+                notifyDenied = false
+                openNotificationSettings()
+            },
+            onDismiss = { notifyDenied = false },
+        )
+    }
 
     imports.firstOrNull { it.first.id == pendingUndo }?.let { (batch, _) ->
         ConfirmDialog(
@@ -184,6 +227,9 @@ fun SettingsScreen(
     data: DataActions,
     imports: List<Pair<ImportBatch, CivilDate>> = emptyList(),
     onUndoImport: (ImportBatch) -> Unit = {},
+    notify: NotifyState = NotifyState(),
+    onNotify: (Boolean) -> Unit = {},
+    onAllowNotifications: () -> Unit = {},
 ) {
     val f = LocalFormatters.current
     val colors = FuelTheme.colors
@@ -252,6 +298,34 @@ fun SettingsScreen(
                         ),
                         style = FuelTheme.type.body,
                         color = colors.textPrimary,
+                    )
+                }
+            }
+
+            SectionLabel(
+                stringResource(R.string.settings_reminders),
+                Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, top = 14.dp, bottom = 9.dp),
+            )
+            Column(
+                Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                ToggleRow(
+                    title = stringResource(R.string.settings_notify),
+                    checked = notify.on,
+                    onCheckedChange = onNotify,
+                    body = stringResource(R.string.settings_notify_body),
+                )
+                if (notify.blocked) {
+                    Note(stringResource(R.string.notify_blocked))
+                    Text(
+                        stringResource(R.string.notify_allow),
+                        style = FuelTheme.type.button,
+                        color = colors.textPrimary,
+                        modifier = Modifier
+                            .heightIn(min = Dimens.minTouchTarget)
+                            .clickable(role = Role.Button, onClick = onAllowNotifications)
+                            .padding(vertical = 13.dp),
                     )
                 }
             }

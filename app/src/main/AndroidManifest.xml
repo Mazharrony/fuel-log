@@ -64,6 +64,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Woken only by the app's own alarm; nothing outside the app can make it run. -->
+        <receiver
+            android:name=".notify.DailyCheckReceiver"
+            android:exported="false" />
+
+        <!--
+          Re-arms the reminder alarm after a reboot or an update. Disabled until the user turns
+          reminder notifications on, so nobody who never opted in has any boot-time work.
+        -->
+        <receiver
+            android:name=".notify.BootReceiver"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

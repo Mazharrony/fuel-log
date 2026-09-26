@@ -7,6 +7,11 @@ import com.fuelexpenselog.app.backup.BackupWriter
 import com.fuelexpenselog.app.data.db.FuelLogDatabase
 import com.fuelexpenselog.app.data.prefs.AppPrefs
 import com.fuelexpenselog.app.data.repo.FuelLogRepository
+import com.fuelexpenselog.app.notify.DailyCheck
+import com.fuelexpenselog.app.notify.NotificationGate
+import com.fuelexpenselog.app.notify.ReminderNotifications
+import com.fuelexpenselog.app.notify.ReminderNotifier
+import com.fuelexpenselog.app.notify.ReminderScheduler
 import com.fuelexpenselog.app.transfer.SafGateway
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +61,14 @@ class AppContainer(
     val prefs: AppPrefs = AppPrefs(context)
 
     val saf: SafGateway = SafGateway(context.contentResolver)
+
+    val notificationGate: NotificationGate = NotificationGate(context)
+
+    val reminderScheduler: ReminderScheduler = ReminderScheduler(context, prefs, clock, zone)
+
+    val reminderNotifications: ReminderNotifications = ReminderNotifications(prefs, notificationGate, reminderScheduler)
+
+    fun dailyCheck() = DailyCheck(repository, prefs, notificationGate, ReminderNotifier(context), reminderScheduler, clock, zone)
 
     fun backupWriter() = BackupWriter({ database }, ::databaseFile, prefs, BuildConfig.VERSION_NAME, clock)
 

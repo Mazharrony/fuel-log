@@ -23,6 +23,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val container = (application as FuelLogApp).container
+        // A force stop clears the app's alarms and nothing else would bring them back until a
+        // reboot. Opening the app puts the daily check back, keeping a check still to come.
+        if (savedInstanceState == null) container.reminderNotifications.rearm()
         setContent {
             FuelLogTheme {
                 CompositionLocalProvider(LocalFormatters provides rememberFormatters()) {

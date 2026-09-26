@@ -550,6 +550,19 @@
         <item quantity="other">Removed %s entries.</item>
     </plurals>
 
+    <!-- Reminder notifications: opt in, never on by default -->
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_notify">Notify me when one comes due</string>
+    <string name="settings_notify_body">One quiet check a day. Off, reminders show only in the app.</string>
+    <string name="notify_blocked">Notifications are blocked for this app in the phone\'s settings, so reminders show only in the app.</string>
+    <string name="notify_allow">Allow in settings</string>
+    <string name="notify_denied_title">Notifications stay off</string>
+    <string name="notify_denied_body">Reminders still show in the app. To be told when one comes due, allow notifications for this app in the phone\'s settings.</string>
+    <string name="notify_open_settings">Open settings</string>
+    <string name="notify_not_now">Not now</string>
+    <string name="notify_channel">Reminders</string>
+    <string name="notify_channel_body">When an oil change, a service or a renewal comes due</string>
+
     <!-- First run -->
     <string name="onboarding_import_prompt">Already logging elsewhere?</string>
     <string name="onboarding_import_link">Import a CSV</string>

@@ -10,6 +10,7 @@ import com.fuelexpenselog.app.ui.entry.ExpenseEditorViewModel
 import com.fuelexpenselog.app.ui.entry.FillUpEditorViewModel
 import com.fuelexpenselog.app.ui.export.ExportViewModel
 import com.fuelexpenselog.app.ui.settings.DataViewModel
+import com.fuelexpenselog.app.ui.settings.NotifyViewModel
 import com.fuelexpenselog.app.ui.garage.GarageViewModel
 import com.fuelexpenselog.app.ui.history.HistoryViewModel
 import com.fuelexpenselog.app.ui.importflow.ImportViewModel
@@ -60,6 +61,7 @@ object FuelViewModels {
         }
         initializer { OnboardingViewModel(createSavedStateHandle(), container.repository, container.prefs) }
         initializer { SettingsViewModel(container.prefs) }
+        initializer { NotifyViewModel(container.prefs, container.reminderNotifications, container.notificationGate) }
         initializer {
             val c = container
             DataViewModel(c.saf, c::backupWriter, c::backupReader, c::onRestored, c.clock, c.zone, c.repository)

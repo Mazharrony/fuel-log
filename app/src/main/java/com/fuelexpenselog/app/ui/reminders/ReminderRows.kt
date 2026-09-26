@@ -1,6 +1,5 @@
 package com.fuelexpenselog.app.ui.reminders
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,68 +25,24 @@ import com.fuelexpenselog.app.ui.theme.FuelTheme
 import com.fuelexpenselog.domain.reminder.Reminder
 import com.fuelexpenselog.domain.reminder.ReminderStatus
 import com.fuelexpenselog.domain.unit.DistanceUnit
-import java.text.NumberFormat
 
 /** "Every 6 months or 10,000 km". Null for a reminder that does not repeat. */
 @Composable
-fun scheduleText(reminder: Reminder, unit: DistanceUnit): String? {
-    val f = LocalFormatters.current
-    val months = reminder.repeatMonths?.takeIf { reminder.kind.usesDate }?.let { count ->
-        pluralStringResource(R.plurals.reminder_months, count, NumberFormat.getIntegerInstance(f.locale).format(count))
-    }
-    val distance = reminder.repeatDistanceM?.takeIf { reminder.kind.usesDistance }?.let { f.distance.format(it, unit) }
-    val every = joined(R.string.reminder_or, months, distance) ?: return null
-    return stringResource(R.string.reminder_every, every)
-}
+fun scheduleText(reminder: Reminder, unit: DistanceUnit): String? =
+    ReminderWording.schedule(LocalResources.current, LocalFormatters.current, reminder, unit)
 
 /**
  * Where it stands, in words: "12 days overdue", "Due in 300 km", "Due 26 Mar 2027 or at
  * 58,700 km". Null when there is nothing to count from; [StatusLine] shows a dash for it.
  */
 @Composable
-fun statusText(reminder: Reminder, status: ReminderStatus, unit: DistanceUnit): String? = when (status) {
-    is ReminderStatus.Overdue ->
-        joined(R.string.reminder_and, days(status.daysOver), distance(status.metresOver, unit))
-            ?.let { stringResource(R.string.reminder_overdue, it) }
-    is ReminderStatus.DueSoon -> when {
-        status.daysLeft == 0L -> stringResource(R.string.reminder_due_today)
-        status.metresLeft == 0L -> stringResource(R.string.reminder_due_now)
-        else -> joined(R.string.reminder_or, days(status.daysLeft), distance(status.metresLeft, unit))
-            ?.let { stringResource(R.string.reminder_due_in, it) }
-    }
-    ReminderStatus.Ok -> dueText(reminder, unit)
-    ReminderStatus.Unknown -> null
-}
+fun statusText(reminder: Reminder, status: ReminderStatus, unit: DistanceUnit): String? =
+    ReminderWording.status(LocalResources.current, LocalFormatters.current, reminder, status, unit)
 
 /** The next due date and reading, however far off: "Due 26 Mar 2027 or at 58,700 km". */
 @Composable
-fun dueText(reminder: Reminder, unit: DistanceUnit): String? {
-    val f = LocalFormatters.current
-    val date = reminder.dueDate?.takeIf { reminder.kind.usesDate }?.let { f.date.medium(it) }
-    val at = reminder.dueOdometerM?.takeIf { reminder.kind.usesDistance }?.let { f.distance.format(it, unit) }
-    return when {
-        date != null && at != null -> stringResource(R.string.reminder_due_on_or_at, date, at)
-        date != null -> stringResource(R.string.reminder_due_on, date)
-        at != null -> stringResource(R.string.reminder_due_at, at)
-        else -> null
-    }
-}
-
-@Composable
-private fun days(count: Long?): String? = count?.let {
-    val f = LocalFormatters.current
-    pluralStringResource(R.plurals.reminder_days, it.toInt(), NumberFormat.getIntegerInstance(f.locale).format(it))
-}
-
-@Composable
-private fun distance(metres: Long?, unit: DistanceUnit): String? =
-    metres?.let { LocalFormatters.current.distance.format(it, unit) }
-
-@Composable
-private fun joined(@StringRes pattern: Int, a: String?, b: String?): String? = when {
-    a != null && b != null -> stringResource(pattern, a, b)
-    else -> a ?: b
-}
+fun dueText(reminder: Reminder, unit: DistanceUnit): String? =
+    ReminderWording.due(LocalResources.current, LocalFormatters.current, reminder, unit)
 
 /**
  * The status in its colour: overdue in the danger ink, due soon in the warning ink. Nothing

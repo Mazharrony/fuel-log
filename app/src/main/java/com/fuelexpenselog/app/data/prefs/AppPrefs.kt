@@ -61,6 +61,14 @@ class AppPrefs(context: Context) {
         get() = sp.getBoolean(KEY_REMINDERS_NOTIFY, false)
         set(value) = sp.edit { putBoolean(KEY_REMINDERS_NOTIFY, value) }
 
+    /**
+     * When the reminder alarm is next due to fire, so re-arming it after a force stop keeps a
+     * check that is still to come. 0 when none is set. Device-local; not part of a backup.
+     */
+    var reminderCheckAt: Long
+        get() = sp.getLong(KEY_REMINDER_CHECK_AT, 0L)
+        set(value) = sp.edit { putLong(KEY_REMINDER_CHECK_AT, value) }
+
     /** The vehicle the entry screens default to. 0 means none chosen yet. */
     var lastVehicleId: Long
         get() = sp.getLong(KEY_LAST_VEHICLE_ID, 0L)
@@ -116,6 +124,7 @@ class AppPrefs(context: Context) {
         const val KEY_DEFAULT_VOLUME_UNIT = "default_volume_unit"
         const val KEY_DEFAULT_CURRENCY = "default_currency"
         const val KEY_REMINDERS_NOTIFY = "reminders_notify"
+        const val KEY_REMINDER_CHECK_AT = "reminder_check_at"
         const val KEY_LAST_VEHICLE_ID = "last_vehicle_id"
         const val KEY_DISMISSED_PROPOSALS = "dismissed_proposals"
     }

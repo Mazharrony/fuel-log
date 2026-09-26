@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fuelexpenselog.app.R
@@ -37,6 +39,7 @@ import com.fuelexpenselog.app.ui.chart.ConsumptionChart
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
 import com.fuelexpenselog.app.ui.common.IconBox
+import com.fuelexpenselog.app.ui.common.Note
 import com.fuelexpenselog.app.ui.common.SectionLabel
 import com.fuelexpenselog.app.ui.common.SplitActionBar
 import com.fuelexpenselog.app.ui.common.SunkenPanel
@@ -44,6 +47,7 @@ import com.fuelexpenselog.app.ui.common.bottomHairline
 import com.fuelexpenselog.app.ui.common.dashOr
 import com.fuelexpenselog.app.ui.common.label
 import com.fuelexpenselog.app.ui.common.topHairline
+import com.fuelexpenselog.app.ui.settings.NotifyViewModel
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
 import com.fuelexpenselog.domain.consumption.Gap
@@ -59,8 +63,16 @@ fun GarageRoute(
     onAddExpense: () -> Unit,
     onSettings: () -> Unit,
     viewModel: GarageViewModel = viewModel(factory = FuelViewModels.Factory),
+    notifyViewModel: NotifyViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val notify by notifyViewModel.state.collectAsStateWithLifecycle()
+    // Revoking the permission happens in system settings, while this screen waits behind it.
+    LifecycleResumeEffect(Unit) {
+        notifyViewModel.refresh()
+        onPauseOrDispose { }
+    }
     GarageScreen(
         state = state,
         onAddVehicle = onAddVehicle,
@@ -69,6 +81,8 @@ fun GarageRoute(
         onAddFillUp = onAddFillUp,
         onAddExpense = onAddExpense,
         onSettings = onSettings,
+        notificationsBlocked = notify.blocked,
+        onAllowNotifications = { context.startActivity(notifyViewModel.settingsIntent()) },
     )
 }
 
@@ -82,9 +96,12 @@ fun GarageScreen(
     onAddFillUp: () -> Unit = {},
     onAddExpense: () -> Unit = {},
     onSettings: () -> Unit = {},
+    notificationsBlocked: Boolean = false,
+    onAllowNotifications: () -> Unit = {},
 ) {
     FuelScreen {
         GarageHeader(onSettings)
+        if (notificationsBlocked) BlockedBanner(onAllowNotifications)
         when (state) {
             GarageUiState.Loading -> Unit
             is GarageUiState.Ready -> {
@@ -100,6 +117,27 @@ fun GarageScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Reminders are switched on but the system will not show them. The switch is the user's and
+ * stays on; this says so, once, and offers the way back.
+ */
+@Composable
+private fun BlockedBanner(onAllow: () -> Unit) {
+    val colors = FuelTheme.colors
+    Column(Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, bottom = 14.dp)) {
+        Note(stringResource(R.string.notify_blocked))
+        Text(
+            stringResource(R.string.notify_allow),
+            style = FuelTheme.type.button,
+            color = colors.textPrimary,
+            modifier = Modifier
+                .heightIn(min = Dimens.minTouchTarget)
+                .clickable(role = Role.Button, onClick = onAllow)
+                .padding(vertical = 13.dp),
+        )
     }
 }
 
