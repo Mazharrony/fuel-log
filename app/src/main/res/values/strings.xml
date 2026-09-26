@@ -256,6 +256,110 @@
     <string name="collects_licences_heading">Open-source licences</string>
     <string name="collects_licences_body">Instrument Sans, copyright 2022 The Instrument Sans Project Authors, used under the SIL Open Font License 1.1.</string>
 
+    <!-- Vehicle -->
+    <string name="vehicle_edit">Edit</string>
+    <string name="cd_switch_vehicle">Switch vehicle</string>
+    <string name="vehicle_last_tank">%1$s last tank</string>
+    <plurals name="vehicle_covers_fillups">
+        <item quantity="one">Covers %d fill-up</item>
+        <item quantity="other">Covers %d fill-ups</item>
+    </plurals>
+    <string name="vehicle_implausible">Far outside the usual range. Shown, not trusted.</string>
+    <string name="vehicle_average">Average</string>
+    <string name="vehicle_per">Per %1$s</string>
+    <string name="vehicle_delta_vs">%1$s vs %2$s</string>
+    <string name="vehicle_statistics">Statistics</string>
+    <string name="vehicle_months">Months</string>
+    <string name="vehicle_history">History</string>
+    <plurals name="vehicle_see_all">
+        <item quantity="one">See %s entry</item>
+        <item quantity="other">See all %s entries</item>
+    </plurals>
+    <string name="vehicle_no_entries">No entries yet. Log a fill-up and the figures start after the second full tank.</string>
+    <string name="vehicle_last_done">Last done at</string>
+    <string name="vehicle_last_done_value">%1$s · %2$s ago</string>
+    <string name="vehicle_last_done_date">%1$s</string>
+
+    <!-- History rows -->
+    <string name="history_partial">%1$s · partial</string>
+    <string name="history_per_unit">%1$s/%2$s</string>
+    <string name="history_all">All</string>
+    <string name="history_title">History</string>
+    <string name="history_title_month">%1$s</string>
+    <string name="history_empty">Nothing logged here yet.</string>
+    <string name="fuel">Fuel</string>
+
+    <!-- Odometer proposals -->
+    <string name="proposal_typo_title">A reading looks mistyped</string>
+    <string name="proposal_typo_body">%1$s on %2$s sits between readings on either side of it. %3$s would fit.</string>
+    <string name="proposal_typo_unknown">%1$s on %2$s sits out of line with the readings around it. Open it to check the number.</string>
+    <string name="proposal_typo_fix">Change to %1$s</string>
+    <string name="proposal_open">Open it</string>
+    <string name="proposal_rollover_title">The odometer rolled over</string>
+    <string name="proposal_rollover_body">%1$s on %2$s looks like the odometer passed its maximum and started again. Bridging it keeps every figure across the wrap.</string>
+    <string name="proposal_rollover_fix">Bridge it</string>
+    <string name="proposal_rollover_same_day">Two fill-ups on %1$s sit either side of the wrap. Move one of them to another day, then bridge it.</string>
+    <string name="proposal_reset_title">The odometer went back</string>
+    <string name="proposal_reset_body">%1$s on %2$s is lower than before and carries on from there. What happened?</string>
+    <string name="proposal_reset_replaced">Odometer replaced</string>
+    <string name="proposal_reset_bought">Bought used</string>
+    <string name="proposal_dismiss">Leave it</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_header">Consumption · last %1$d spans</string>
+    <string name="stats_average">%1$s average</string>
+    <string name="stats_gap_line">%1$s: %2$s</string>
+    <string name="stats_fuel">Fuel</string>
+    <string name="stats_other">Maintenance and expenses</string>
+    <string name="stats_total">Total running cost</string>
+    <string name="stats_cost_per">Cost per %1$s</string>
+    <string name="stats_distance">Distance logged</string>
+    <string name="stats_month_on_month">Month on month</string>
+    <string name="stats_to_date">%1$s to date</string>
+    <string name="stats_no_spans">Needs two full tanks before there is anything to chart.</string>
+
+    <!-- Months -->
+    <string name="months_title">Months</string>
+    <string name="months_average">Monthly average</string>
+    <string name="months_highest">Highest</string>
+    <string name="months_legend_fuel">Fuel</string>
+    <string name="months_legend_other">Everything else</string>
+    <string name="months_footer">Tap a month for its categories. Months with no entries are left out rather than shown as zero.</string>
+    <string name="months_empty">No entries in %1$d.</string>
+    <string name="cd_previous_year">Previous year</string>
+    <string name="cd_next_year">Next year</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+
+    <!-- Month detail -->
+    <plurals name="month_entries">
+        <item quantity="one">%s entry</item>
+        <item quantity="other">%s entries</item>
+    </plurals>
+    <plurals name="month_fillups">
+        <item quantity="one">%s fill-up</item>
+        <item quantity="other">%s fill-ups</item>
+    </plurals>
+    <string name="month_driven">%1$s driven</string>
+    <string name="month_by_category">By category</string>
+    <string name="month_last_year">Same month last year</string>
+    <plurals name="month_see_entries">
+        <item quantity="one">See %s entry</item>
+        <item quantity="other">See %s entries</item>
+    </plurals>
+    <string name="month_empty">Nothing logged this month.</string>
+    <string name="month_export">Export month</string>
+
+    <!-- Garage figures -->
+    <string name="garage_month_line">%1$s this month · %2$s last</string>
+    <string name="garage_month_only">%1$s this month</string>
+    <string name="garage_rate">%1$s/%2$s</string>
+    <string name="garage_year_panel">Across all vehicles · %1$d</string>
+    <string name="garage_year_note">fuel plus everything else</string>
+    <string name="garage_by_currency">This month · by currency</string>
+    <string name="garage_no_exchange">Not added together. The app holds no exchange rates and will not invent one offline.</string>
+
     <!-- Currency picker -->
     <string name="currency_picker_title">Currency</string>
     <string name="currency_search">Search by code or name</string>

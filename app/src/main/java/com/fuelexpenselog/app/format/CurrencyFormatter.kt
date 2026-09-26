@@ -24,6 +24,14 @@ class CurrencyFormatter(private val locale: Locale) {
      */
     fun formatRate(money: Money): String = format(money, minimumDecimals = 2)
 
+    /**
+     * Per-currency subtotals side by side - "€212.40 · ₹5,000" - and never added together.
+     * Nothing at all is a dash.
+     */
+    fun formatAll(amounts: List<Money>): String =
+        if (amounts.isEmpty()) com.fuelexpenselog.domain.format.Rounding.EM_DASH
+        else amounts.joinToString(" · ") { format(it) }
+
     /** "€", "$", "£", or the code itself when the locale has no symbol for it. */
     fun symbol(code: String): String =
         currencyOrNull(code)?.getSymbol(locale) ?: code

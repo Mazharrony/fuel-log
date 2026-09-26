@@ -19,6 +19,7 @@ class Formatters(
     val volume: VolumeFormatter,
     val consumption: ConsumptionFormatter,
     val date: DateFormatter,
+    val delta: DeltaFormatter = DeltaFormatter(locale),
 ) {
     companion object {
         fun from(context: Context): Formatters {

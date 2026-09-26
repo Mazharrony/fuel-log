@@ -21,6 +21,10 @@ class DateFormatter(private val locale: Locale) {
     private val monthYear = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMMy"), locale)
     private val monthName = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMM"), locale)
     private val monthShort = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMM"), locale)
+    private val numeric = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "Md"), locale)
+
+    /** "9/17" in en-US, "17.9." in de-DE: narrow enough to sit under a chart bar. */
+    fun numeric(date: CivilDate): String = numeric.format(date.toLocalDate())
 
     /** "Sep 17, 2026". */
     fun medium(date: CivilDate): String = medium.format(date.toLocalDate())

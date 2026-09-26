@@ -33,16 +33,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fuelexpenselog.app.R
 import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
+import com.fuelexpenselog.app.ui.chart.ConsumptionChart
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
 import com.fuelexpenselog.app.ui.common.IconBox
+import com.fuelexpenselog.app.ui.common.SectionLabel
 import com.fuelexpenselog.app.ui.common.SplitActionBar
+import com.fuelexpenselog.app.ui.common.SunkenPanel
 import com.fuelexpenselog.app.ui.common.bottomHairline
 import com.fuelexpenselog.app.ui.common.dashOr
 import com.fuelexpenselog.app.ui.common.label
 import com.fuelexpenselog.app.ui.common.topHairline
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
+import com.fuelexpenselog.domain.consumption.Gap
+import com.fuelexpenselog.domain.consumption.GapReason
+import com.fuelexpenselog.domain.consumption.Measured
 
 @Composable
 fun GarageRoute(
@@ -155,7 +161,14 @@ private fun GarageList(
             }
         }
         items(state.active, key = { it.vehicle.id }) { item ->
-            VehicleBlock(item, onClick = { onOpenVehicle(item.vehicle.id) })
+            if (state.mixedCurrency) {
+                CompactBlock(item, onClick = { onOpenVehicle(item.vehicle.id) })
+            } else {
+                VehicleBlock(item, onClick = { onOpenVehicle(item.vehicle.id) })
+            }
+        }
+        if (state.mixedCurrency && state.thisMonthByCurrency.isNotEmpty()) {
+            item(key = "by-currency") { ByCurrencyPanel(state) }
         }
         item(key = "add") {
             AddVehicleRow(onAddVehicle)
@@ -166,29 +179,54 @@ private fun GarageList(
             }
             if (state.showArchived) {
                 items(state.archived, key = { "a${it.vehicle.id}" }) { item ->
-                    VehicleBlock(item, archived = true, onClick = { onOpenVehicle(item.vehicle.id) })
+                    CompactBlock(item, archived = true, onClick = { onOpenVehicle(item.vehicle.id) })
                 }
             }
+        }
+        if (!state.mixedCurrency && state.yearTotal.isNotEmpty()) {
+            item(key = "year") { YearPanel(state) }
         }
     }
 }
 
+/** "84,210 mi · Gas", plus "Archived" when it is. */
+@Composable
+private fun metaLine(item: GarageVehicle, archived: Boolean): String {
+    val f = LocalFormatters.current
+    return listOfNotNull(
+        item.odometerM?.let { f.distance.format(it, item.vehicle.distanceUnit) },
+        item.vehicle.fuelType.label(),
+        if (archived) stringResource(R.string.garage_archived) else null,
+    ).joinToString(" · ")
+}
+
+/** The headline figure, or a dash - never a zero - and its unit. */
+@Composable
+private fun figureOf(item: GarageVehicle): Pair<String, String> {
+    val f = LocalFormatters.current
+    val value = (item.latest as? Measured)?.shownAs(item.format)
+    return f.consumption.value(value, item.format) to f.consumption.unitLabel(item.format)
+}
+
+/** Why there is no figure, when there is none. Its own line, so it never squeezes the name. */
+@Composable
+private fun reasonOf(item: GarageVehicle): String? = when (val latest = item.latest) {
+    is Measured -> null
+    is Gap -> latest.reason.label()
+    null -> GapReason.FIRST_FILL_UP.label()
+}
+
 /**
- * One vehicle: name and meta on the left, the headline figure on the right. Until two full
- * tanks exist there is no figure, and the block says so rather than showing a zero.
+ * One vehicle: name and meta, the headline figure, a nine-slot sparkline, and this month
+ * against last. Until two full tanks exist there is no figure, and the block says so.
  */
 @Composable
-private fun VehicleBlock(item: GarageVehicle, onClick: () -> Unit, archived: Boolean = false) {
+private fun VehicleBlock(item: GarageVehicle, onClick: () -> Unit) {
     val colors = FuelTheme.colors
     val type = FuelTheme.type
     val f = LocalFormatters.current
     val vehicle = item.vehicle
-
-    val meta = listOfNotNull(
-        item.odometerM?.let { f.distance.format(it, vehicle.distanceUnit) },
-        vehicle.fuelType.label(),
-        if (archived) stringResource(R.string.garage_archived) else null,
-    ).joinToString(" · ")
+    val (figure, caption) = figureOf(item)
 
     Column(
         modifier = Modifier
@@ -200,23 +238,112 @@ private fun VehicleBlock(item: GarageVehicle, onClick: () -> Unit, archived: Boo
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    vehicle.name,
-                    style = type.subtitle,
-                    color = if (archived) colors.textSecondary else colors.textPrimary,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(meta, style = type.meta, color = colors.textSecondary)
+                Text(vehicle.name, style = type.subtitle, color = colors.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(metaLine(item, archived = false), style = type.meta, color = colors.textSecondary)
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(dashOr(null), style = type.figureRow, color = colors.textPrimary)
+                Text(figure, style = type.figureRow, color = colors.textPrimary)
+                Text(caption, style = type.meta, color = colors.textSecondary)
+            }
+        }
+        reasonOf(item)?.let { Text(it, style = type.meta, color = colors.textSecondary) }
+        if (item.recent.isNotEmpty()) {
+            ConsumptionChart(
+                points = item.recent,
+                format = item.format,
+                height = Dimens.sparklineHeight,
+                gap = Dimens.sparklineBarGap,
+                showLabels = false,
+            )
+        }
+        if (item.thisMonth.isNotEmpty() || item.lastMonth.isNotEmpty() || item.costPerDistance != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // "— last" says nothing, so a month with nothing before it stands alone.
+                val monthLine = if (item.lastMonth.isEmpty()) {
+                    stringResource(R.string.garage_month_only, f.currency.formatAll(item.thisMonth))
+                } else {
+                    stringResource(R.string.garage_month_line, f.currency.formatAll(item.thisMonth), f.currency.formatAll(item.lastMonth))
+                }
                 Text(
-                    stringResource(R.string.garage_needs_two_full_tanks),
+                    monthLine,
                     style = type.meta,
                     color = colors.textSecondary,
+                    modifier = Modifier.weight(1f),
                 )
+                item.costPerDistance?.let {
+                    Text(
+                        stringResource(R.string.garage_rate, f.currency.formatRate(it), f.distance.unitLabel(vehicle.distanceUnit)),
+                        style = type.meta,
+                        color = colors.textSecondary,
+                    )
+                }
             }
+        }
+    }
+}
+
+/** The mixed-currency row: this month's spend first, the figure beneath it. */
+@Composable
+private fun CompactBlock(item: GarageVehicle, onClick: () -> Unit, archived: Boolean = false) {
+    val colors = FuelTheme.colors
+    val type = FuelTheme.type
+    val f = LocalFormatters.current
+    val (figure, caption) = figureOf(item)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .topHairline(colors.outline)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = Dimens.gutter, vertical = 17.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(
+                item.vehicle.name,
+                style = type.body,
+                color = if (archived) colors.textSecondary else colors.textPrimary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(metaLine(item, archived), style = type.meta, color = colors.textSecondary)
+        }
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(f.currency.formatAll(item.thisMonth), style = type.body, color = colors.textPrimary)
+            Text("$figure $caption", style = type.meta, color = colors.textSecondary)
+        }
+    }
+}
+
+/** Never a sum across currencies: one subtotal each, and the reason in words. */
+@Composable
+private fun ByCurrencyPanel(state: GarageUiState.Ready) {
+    val f = LocalFormatters.current
+    SunkenPanel {
+        SectionLabel(stringResource(R.string.garage_by_currency))
+        state.thisMonthByCurrency.forEach { money ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(f.currency.displayName(money.currency), style = FuelTheme.type.meta, color = FuelTheme.colors.textSecondary, modifier = Modifier.weight(1f))
+                Text(f.currency.format(money), style = FuelTheme.type.figureRow, color = FuelTheme.colors.textPrimary)
+            }
+        }
+        Text(stringResource(R.string.garage_no_exchange), style = FuelTheme.type.meta, color = FuelTheme.colors.textSecondary)
+    }
+}
+
+@Composable
+private fun YearPanel(state: GarageUiState.Ready) {
+    val f = LocalFormatters.current
+    SunkenPanel {
+        SectionLabel(stringResource(R.string.garage_year_panel, state.year))
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                f.currency.formatAll(state.yearTotal),
+                style = FuelTheme.type.figureM,
+                color = FuelTheme.colors.textPrimary,
+                modifier = Modifier.weight(1f),
+            )
+            Text(stringResource(R.string.garage_year_note), style = FuelTheme.type.meta, color = FuelTheme.colors.textSecondary)
         }
     }
 }

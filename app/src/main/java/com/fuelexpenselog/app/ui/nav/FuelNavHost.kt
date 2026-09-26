@@ -16,10 +16,17 @@ import androidx.navigation.navArgument
 import com.fuelexpenselog.app.ui.entry.ExpenseEditorRoute
 import com.fuelexpenselog.app.ui.entry.FillUpEditorRoute
 import com.fuelexpenselog.app.ui.garage.GarageRoute
+import com.fuelexpenselog.app.ui.history.HistoryRoute
+import com.fuelexpenselog.app.ui.months.MonthDetailRoute
+import com.fuelexpenselog.app.ui.months.MonthsRoute
 import com.fuelexpenselog.app.ui.onboarding.OnboardingRoute
 import com.fuelexpenselog.app.ui.settings.CollectsScreen
 import com.fuelexpenselog.app.ui.settings.SettingsRoute
+import com.fuelexpenselog.app.ui.stats.StatisticsRoute
+import com.fuelexpenselog.app.ui.vehicle.VehicleNavigation
+import com.fuelexpenselog.app.ui.vehicle.VehicleRoute
 import com.fuelexpenselog.app.ui.vehicles.VehicleEditorRoute
+import com.fuelexpenselog.domain.model.HistoryEntry
 
 /**
  * A 220ms fade-through: the outgoing screen fades out over the first third, the incoming one
@@ -31,13 +38,19 @@ private const val IN_MS = 143
 private val fadeThroughIn: EnterTransition = fadeIn(tween(IN_MS, delayMillis = OUT_MS))
 private val fadeThroughOut: ExitTransition = fadeOut(tween(OUT_MS))
 
-private val idArg: List<NamedNavArgument> = listOf(navArgument(Routes.ARG_ID) { type = NavType.LongType })
-private val vehicleArg: List<NamedNavArgument> = listOf(
-    navArgument(Routes.ARG_VEHICLE) {
-        type = NavType.LongType
-        defaultValue = 0L
-    },
-)
+private val idArg: NamedNavArgument = navArgument(Routes.ARG_ID) { type = NavType.LongType }
+private val vehicleArg: NamedNavArgument = navArgument(Routes.ARG_VEHICLE) {
+    type = NavType.LongType
+    defaultValue = 0L
+}
+private val monthArg: NamedNavArgument = navArgument(Routes.ARG_MONTH) {
+    type = NavType.IntType
+    defaultValue = 0
+}
+private val yearArg: NamedNavArgument = navArgument(Routes.ARG_YEAR) {
+    type = NavType.IntType
+    defaultValue = 0
+}
 
 /**
  * [onboarded] is read once at launch: a fresh install starts in onboarding, which replaces
@@ -47,6 +60,12 @@ private val vehicleArg: List<NamedNavArgument> = listOf(
 @Composable
 fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberNavController()) {
     val back: () -> Unit = { navController.popBackStack() }
+    val openEntry: (HistoryEntry) -> Unit = { entry ->
+        when (entry) {
+            is HistoryEntry.Fuel -> navController.navigate(Routes.fillUpEdit(entry.fillUp.id))
+            is HistoryEntry.Cost -> navController.navigate(Routes.expenseEdit(entry.expense.id))
+        }
+    }
     NavHost(
         navController = navController,
         startDestination = if (onboarded) Routes.GARAGE else Routes.ONBOARDING,
@@ -65,7 +84,7 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
         composable(Routes.GARAGE) {
             GarageRoute(
                 onAddVehicle = { navController.navigate(Routes.VEHICLE_NEW) },
-                onOpenVehicle = { id -> navController.navigate(Routes.vehicleEdit(id)) },
+                onOpenVehicle = { id -> navController.navigate(Routes.vehicle(id)) },
                 onAddFillUp = { navController.navigate(Routes.fillUpNew()) },
                 onAddExpense = { navController.navigate(Routes.expenseNew()) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
@@ -75,11 +94,57 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
             SettingsRoute(onBack = back, onCollects = { navController.navigate(Routes.COLLECTS) })
         }
         composable(Routes.COLLECTS) { CollectsScreen(onBack = back) }
+
         composable(Routes.VEHICLE_NEW) { VehicleEditorRoute(onDone = back) }
-        composable(Routes.VEHICLE_EDIT, arguments = idArg) { VehicleEditorRoute(onDone = back) }
-        composable(Routes.FILLUP_NEW, arguments = vehicleArg) { FillUpEditorRoute(onDone = back) }
-        composable(Routes.FILLUP_EDIT, arguments = idArg) { FillUpEditorRoute(onDone = back) }
-        composable(Routes.EXPENSE_NEW, arguments = vehicleArg) { ExpenseEditorRoute(onDone = back) }
-        composable(Routes.EXPENSE_EDIT, arguments = idArg) { ExpenseEditorRoute(onDone = back) }
+        composable(Routes.VEHICLE, arguments = listOf(idArg)) {
+            VehicleRoute(
+                VehicleNavigation(
+                    onBack = back,
+                    onEdit = { navController.navigate(Routes.vehicleEdit(it)) },
+                    onSwitch = { id ->
+                        navController.navigate(Routes.vehicle(id)) {
+                            popUpTo(Routes.VEHICLE) { inclusive = true }
+                        }
+                    },
+                    onStatistics = { navController.navigate(Routes.statistics(it)) },
+                    onMonths = { navController.navigate(Routes.months(it)) },
+                    onHistory = { navController.navigate(Routes.history(it)) },
+                    onOpenEntry = openEntry,
+                    onOpenFillUp = { navController.navigate(Routes.fillUpEdit(it)) },
+                    onAddFillUp = { navController.navigate(Routes.fillUpNew(it)) },
+                    onAddExpense = { navController.navigate(Routes.expenseNew(it)) },
+                ),
+            )
+        }
+        composable(Routes.VEHICLE_EDIT, arguments = listOf(idArg)) { VehicleEditorRoute(onDone = back) }
+        composable(Routes.HISTORY, arguments = listOf(idArg, monthArg)) {
+            HistoryRoute(onBack = back, onOpenEntry = openEntry)
+        }
+        composable(Routes.STATISTICS, arguments = listOf(idArg)) { StatisticsRoute(onBack = back) }
+        composable(Routes.MONTHS, arguments = listOf(idArg, yearArg)) { entry ->
+            val vehicleId = entry.arguments?.getLong(Routes.ARG_ID) ?: 0L
+            MonthsRoute(
+                onBack = back,
+                onOpenMonth = { month -> navController.navigate(Routes.monthDetail(vehicleId, month.value)) },
+            )
+        }
+        composable(Routes.MONTH_DETAIL, arguments = listOf(idArg, navArgument(Routes.ARG_MONTH) { type = NavType.IntType })) { entry ->
+            val vehicleId = entry.arguments?.getLong(Routes.ARG_ID) ?: 0L
+            MonthDetailRoute(
+                onBack = back,
+                // Stepping between months replaces this one, so back returns to the list.
+                onMonth = { month ->
+                    navController.navigate(Routes.monthDetail(vehicleId, month.value)) {
+                        popUpTo(Routes.MONTH_DETAIL) { inclusive = true }
+                    }
+                },
+                onSeeEntries = { month -> navController.navigate(Routes.history(vehicleId, month.value)) },
+            )
+        }
+
+        composable(Routes.FILLUP_NEW, arguments = listOf(vehicleArg)) { FillUpEditorRoute(onDone = back) }
+        composable(Routes.FILLUP_EDIT, arguments = listOf(idArg)) { FillUpEditorRoute(onDone = back) }
+        composable(Routes.EXPENSE_NEW, arguments = listOf(vehicleArg)) { ExpenseEditorRoute(onDone = back) }
+        composable(Routes.EXPENSE_EDIT, arguments = listOf(idArg)) { ExpenseEditorRoute(onDone = back) }
     }
 }

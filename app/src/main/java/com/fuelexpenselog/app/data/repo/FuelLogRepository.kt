@@ -13,8 +13,11 @@ import com.fuelexpenselog.domain.model.MaybeUnreadable
 import com.fuelexpenselog.domain.model.Vehicle
 import com.fuelexpenselog.domain.model.buildHistory
 import com.fuelexpenselog.domain.unit.EnergyKind
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /**
@@ -90,6 +93,23 @@ class FuelLogRepository(
 
     fun observeHistory(vehicleId: Long): Flow<List<HistoryEntry>> =
         combine(observeFillUps(vehicleId), observeExpenses(vehicleId), ::buildHistory)
+
+    /**
+     * Every vehicle's history, archived ones included - a sold car's costs this year are still
+     * this year's costs. combine() over zero flows never emits, so an empty garage gets its
+     * own branch; without it the year panel would never render for a new user.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeAllHistory(): Flow<List<Pair<Vehicle, HistoryEntry>>> =
+        observeVehicles().flatMapLatest { list ->
+            if (list.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(list.map { v -> observeHistory(v.id).map { entries -> entries.map { v to it } } }) { perVehicle ->
+                    perVehicle.flatMap { it }
+                }
+            }
+        }
 
     suspend fun fillUp(id: Long): FillUp? = fillUps.byId(id)?.toDomain()
 
