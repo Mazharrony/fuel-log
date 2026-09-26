@@ -1,0 +1,4 @@
+﻿plain,"with,comma","with ""quote""","multi
+line"," leading space",
+Café,,"trailing space ","
+CRLF inside",=SUM(A1),12.50

@@ -360,6 +360,37 @@
     <string name="garage_by_currency">This month · by currency</string>
     <string name="garage_no_exchange">Not added together. The app holds no exchange rates and will not invent one offline.</string>
 
+    <!-- Export -->
+    <string name="export_title">Export CSV</string>
+    <string name="export_vehicle">Vehicle</string>
+    <string name="export_all_vehicles">All vehicles</string>
+    <string name="export_period">Period</string>
+    <string name="export_all_time">All time</string>
+    <string name="export_entries">Entries</string>
+    <plurals name="export_count">
+        <item quantity="one">%s entry will be exported</item>
+        <item quantity="other">%s entries will be exported</item>
+    </plurals>
+    <string name="export_none">Nothing matches. Choose a wider period, or all entries.</string>
+    <string name="export_note">One file with fill-ups and expenses, in your units and in metric, for a spreadsheet or an accountant. You choose where the file goes.</string>
+    <plurals name="export_done">
+        <item quantity="one">Saved %1$s entry to %2$s.</item>
+        <item quantity="other">Saved %1$s entries to %2$s.</item>
+    </plurals>
+    <string name="export_failed">Could not export. %1$s</string>
+    <string name="export_file_fallback">the chosen file</string>
+
+    <!-- Backup and restore -->
+    <string name="backup_done">Backup saved to %1$s.</string>
+    <string name="backup_failed">Could not back up. %1$s</string>
+    <string name="restore_confirm_title">Replace everything?</string>
+    <string name="restore_confirm_body">Everything in the app now is replaced by what the backup holds. This cannot be undone.</string>
+    <string name="restore_confirm">Restore</string>
+    <string name="restore_newer">This backup is from a newer version of Fuel Log. Update the app, then restore it.</string>
+    <string name="restore_not_backup">This file is not a Fuel Log backup.</string>
+    <string name="restore_failed">Could not restore. %1$s</string>
+    <string name="working">Working…</string>
+
     <!-- Currency picker -->
     <string name="currency_picker_title">Currency</string>
     <string name="currency_search">Search by code or name</string>

@@ -15,5 +15,26 @@ class MainDispatcherRule(
     val dispatcher: TestDispatcher = UnconfinedTestDispatcher(),
 ) : TestWatcher() {
     override fun starting(description: Description) = Dispatchers.setMain(dispatcher)
-    override fun finished(description: Description) = Dispatchers.resetMain()
+
+    /**
+     * A ViewModel can still have Room work in flight on a background thread when the test
+     * ends, and its continuation lands on Main just as it is being reset - which throws
+     * "Dispatchers.Main is used concurrently with setting it". That dispatch takes
+     * microseconds, so the reset simply waits it out.
+     */
+    override fun finished(description: Description) {
+        repeat(RESET_ATTEMPTS) {
+            try {
+                Dispatchers.resetMain()
+                return
+            } catch (inFlight: IllegalStateException) {
+                Thread.sleep(10)
+            }
+        }
+        Dispatchers.resetMain()
+    }
+
+    private companion object {
+        const val RESET_ATTEMPTS = 50
+    }
 }

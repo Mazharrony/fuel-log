@@ -19,6 +19,9 @@ import com.fuelexpenselog.app.data.db.entity.ReminderCompletionEntity
 import com.fuelexpenselog.app.data.db.entity.ReminderEntity
 import com.fuelexpenselog.app.data.db.entity.VehicleEntity
 
+/** The schema this build writes. A backup claiming a newer one is refused, not guessed at. */
+const val SCHEMA_VERSION = 1
+
 /**
  * No views, no triggers, no computed columns. "Nothing derived is persisted" is enforced by
  * the schema containing nothing derived, rather than by everyone remembering the rule.
@@ -33,7 +36,7 @@ import com.fuelexpenselog.app.data.db.entity.VehicleEntity
         ReminderCompletionEntity::class,
         ImportBatchEntity::class,
     ],
-    version = 1,
+    version = SCHEMA_VERSION,
     exportSchema = true,
 )
 abstract class FuelLogDatabase : RoomDatabase() {

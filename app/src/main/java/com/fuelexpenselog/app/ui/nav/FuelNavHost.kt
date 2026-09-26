@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.fuelexpenselog.app.ui.entry.ExpenseEditorRoute
 import com.fuelexpenselog.app.ui.entry.FillUpEditorRoute
+import com.fuelexpenselog.app.ui.export.ExportRoute
 import com.fuelexpenselog.app.ui.garage.GarageRoute
 import com.fuelexpenselog.app.ui.history.HistoryRoute
 import com.fuelexpenselog.app.ui.months.MonthDetailRoute
@@ -91,9 +92,14 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
             )
         }
         composable(Routes.SETTINGS) {
-            SettingsRoute(onBack = back, onCollects = { navController.navigate(Routes.COLLECTS) })
+            SettingsRoute(
+                onBack = back,
+                onCollects = { navController.navigate(Routes.COLLECTS) },
+                onExport = { navController.navigate(Routes.export()) },
+            )
         }
         composable(Routes.COLLECTS) { CollectsScreen(onBack = back) }
+        composable(Routes.EXPORT, arguments = listOf(vehicleArg, monthArg)) { ExportRoute(onBack = back) }
 
         composable(Routes.VEHICLE_NEW) { VehicleEditorRoute(onDone = back) }
         composable(Routes.VEHICLE, arguments = listOf(idArg)) {
@@ -139,6 +145,7 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
                     }
                 },
                 onSeeEntries = { month -> navController.navigate(Routes.history(vehicleId, month.value)) },
+                onExport = { month -> navController.navigate(Routes.export(vehicleId, month.value)) },
             )
         }
 

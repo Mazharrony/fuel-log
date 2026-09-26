@@ -8,3 +8,5 @@ gradlew text eol=lf
 *.jar binary
 *.zip binary
 *.ttf binary
+# Golden CSVs are byte-exact: CRLF endings, a BOM, line breaks inside quoted fields.
+*.csv -text

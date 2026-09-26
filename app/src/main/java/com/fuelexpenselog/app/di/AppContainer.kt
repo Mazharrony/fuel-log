@@ -1,9 +1,18 @@
 package com.fuelexpenselog.app.di
 
 import android.content.Context
+import com.fuelexpenselog.app.BuildConfig
+import com.fuelexpenselog.app.backup.BackupReader
+import com.fuelexpenselog.app.backup.BackupWriter
 import com.fuelexpenselog.app.data.db.FuelLogDatabase
 import com.fuelexpenselog.app.data.prefs.AppPrefs
 import com.fuelexpenselog.app.data.repo.FuelLogRepository
+import com.fuelexpenselog.app.transfer.SafGateway
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import java.io.File
 import java.time.Clock
 import java.time.ZoneId
 
@@ -40,7 +49,25 @@ class AppContainer(
         db = null
     }
 
+    fun databaseFile(): File = context.getDatabasePath(FuelLogDatabase.NAME)
+
     val repository: FuelLogRepository = FuelLogRepository({ database }, clock::millis)
 
     val prefs: AppPrefs = AppPrefs(context)
+
+    val saf: SafGateway = SafGateway(context.contentResolver)
+
+    fun backupWriter() = BackupWriter({ database }, ::databaseFile, prefs, BuildConfig.VERSION_NAME, clock)
+
+    fun backupReader() = BackupReader(context.cacheDir, ::databaseFile, prefs, ::closeDatabase)
+
+    private val _restoreEpoch = MutableStateFlow(0)
+
+    /**
+     * Bumped after a restore. The UI re-keys its navigation graph on it, so every screen,
+     * ViewModel and collected Flow is built again against the restored database.
+     */
+    val restoreEpoch: StateFlow<Int> = _restoreEpoch.asStateFlow()
+
+    fun onRestored() = _restoreEpoch.update { it + 1 }
 }

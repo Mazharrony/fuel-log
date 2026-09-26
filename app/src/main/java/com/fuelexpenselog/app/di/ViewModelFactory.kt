@@ -8,6 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fuelexpenselog.app.FuelLogApp
 import com.fuelexpenselog.app.ui.entry.ExpenseEditorViewModel
 import com.fuelexpenselog.app.ui.entry.FillUpEditorViewModel
+import com.fuelexpenselog.app.ui.export.ExportViewModel
+import com.fuelexpenselog.app.ui.settings.DataViewModel
 import com.fuelexpenselog.app.ui.garage.GarageViewModel
 import com.fuelexpenselog.app.ui.history.HistoryViewModel
 import com.fuelexpenselog.app.ui.months.MonthDetailViewModel
@@ -54,6 +56,14 @@ object FuelViewModels {
         }
         initializer { OnboardingViewModel(createSavedStateHandle(), container.repository, container.prefs) }
         initializer { SettingsViewModel(container.prefs) }
+        initializer {
+            val c = container
+            DataViewModel(c.saf, c::backupWriter, c::backupReader, c::onRestored, c.clock, c.zone)
+        }
+        initializer {
+            val c = container
+            ExportViewModel(createSavedStateHandle(), c.repository, c.saf, c.clock, c.zone)
+        }
     }
 
     private val CreationExtras.container: AppContainer

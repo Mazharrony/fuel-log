@@ -16,6 +16,10 @@ object Routes {
     const val SETTINGS = "settings"
     const val COLLECTS = "settings/collects"
 
+    /** [ARG_VEHICLE] 0 exports every vehicle; [ARG_MONTH] 0 offers no single month. */
+    const val EXPORT = "export?$ARG_VEHICLE={$ARG_VEHICLE}&$ARG_MONTH={$ARG_MONTH}"
+    fun export(vehicleId: Long = 0, month: Int = 0) = "export?$ARG_VEHICLE=$vehicleId&$ARG_MONTH=$month"
+
     const val VEHICLE = "vehicle/{$ARG_ID}"
     fun vehicle(id: Long) = "vehicle/$id"
     const val VEHICLE_NEW = "vehicle/new"

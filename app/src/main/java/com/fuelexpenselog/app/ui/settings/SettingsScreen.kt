@@ -1,5 +1,8 @@
 package com.fuelexpenselog.app.ui.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +12,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +30,10 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fuelexpenselog.app.R
+import com.fuelexpenselog.app.backup.BackupReader
 import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
+import com.fuelexpenselog.app.ui.common.ConfirmDialog
 import com.fuelexpenselog.app.ui.common.CurrencyField
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
@@ -55,10 +62,23 @@ class DataActions(
 fun SettingsRoute(
     onBack: () -> Unit,
     onCollects: () -> Unit,
-    data: DataActions = DataActions(),
+    onExport: () -> Unit,
+    onImport: (() -> Unit)? = null,
     viewModel: SettingsViewModel = viewModel(factory = FuelViewModels.Factory),
+    dataViewModel: DataViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val dataStatus by dataViewModel.status.collectAsStateWithLifecycle()
+    var pendingRestore by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    // The system pickers: the user chooses where a backup goes and which one comes back.
+    val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        uri?.let(dataViewModel::backup)
+    }
+    val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        pendingRestore = uri
+    }
+
     SettingsScreen(
         state = state,
         onBack = onBack,
@@ -68,7 +88,52 @@ fun SettingsRoute(
         onCurrency = viewModel::onCurrency,
         onRegion = viewModel::onRegion,
         onCollects = onCollects,
-        data = data,
+        data = DataActions(
+            onExport = onExport,
+            onBackup = { backup.launch(dataViewModel.backupName()) },
+            onRestore = { restore.launch(arrayOf("*/*")) },
+            onImport = onImport,
+        ),
+    )
+
+    pendingRestore?.let { uri ->
+        ConfirmDialog(
+            title = stringResource(R.string.restore_confirm_title),
+            body = stringResource(R.string.restore_confirm_body),
+            confirm = stringResource(R.string.restore_confirm),
+            danger = true,
+            onConfirm = {
+                pendingRestore = null
+                dataViewModel.restore(uri)
+            },
+            onDismiss = { pendingRestore = null },
+        )
+    }
+    DataStatusDialog(dataStatus, dataViewModel::dismiss)
+}
+
+@Composable
+private fun DataStatusDialog(status: DataStatus, onDismiss: () -> Unit) {
+    val message = when (status) {
+        DataStatus.Idle -> return
+        DataStatus.Working -> stringResource(R.string.working)
+        is DataStatus.BackedUp -> stringResource(R.string.backup_done, status.fileName ?: stringResource(R.string.export_file_fallback))
+        is DataStatus.Refused -> when (status.why) {
+            BackupReader.Refusal.NEWER_SCHEMA -> stringResource(R.string.restore_newer)
+            BackupReader.Refusal.NOT_A_BACKUP -> stringResource(R.string.restore_not_backup)
+        }
+        is DataStatus.Failed -> stringResource(if (status.restoring) R.string.restore_failed else R.string.backup_failed, status.message)
+    }
+    AlertDialog(
+        onDismissRequest = { if (status != DataStatus.Working) onDismiss() },
+        text = { Text(message) },
+        confirmButton = {
+            if (status != DataStatus.Working) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(android.R.string.ok), color = FuelTheme.colors.textPrimary)
+                }
+            }
+        },
     )
 }
 

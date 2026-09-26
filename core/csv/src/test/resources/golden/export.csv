@@ -1,0 +1,7 @@
+﻿record_type,vehicle,date,odometer,distance_unit,volume,volume_unit,full_tank,missed_previous,total,unit_price,currency,typed_field,category,tag,station,vendor,note,odometer_m,volume_micro,total_micros
+FILL_UP,Civic,2026-01-01,10000,KILOMETRE,45,LITRE,true,false,67.50,1.50,EUR,total,,PERSONAL,,,,10000000,45000000,67500000
+FILL_UP,Civic,2026-01-15,10520,KILOMETRE,40,LITRE,true,false,60.00,1.50,EUR,total,,PERSONAL,,,"Shell, A1",10520000,40000000,60000000
+EXPENSE,Civic,2026-01-21,10700,KILOMETRE,,,,,89.90,,EUR,total,OIL_CHANGE,BUSINESS,,Kwik Fit,,10700000,,89900000
+FILL_UP,Civic,2026-01-29,10800,KILOMETRE,20,LITRE,false,false,30.00,1.50,EUR,total,,PERSONAL,'=cmd,,,10800000,20000000,30000000
+FILL_UP,Civic,2026-02-12,11100,KILOMETRE,25,LITRE,true,false,36.475,1.459,EUR,unit_price,,PERSONAL,,,,11100000,25000000,36475000
+FILL_UP,Silverado,2026-01-10,84210,MILE,10.5,US_GALLON,true,false,36.80,3.505,USD,total,,PERSONAL,,,,135522858,39746824,36800000
