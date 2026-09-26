@@ -6,6 +6,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fuelexpenselog.app.FuelLogApp
+import com.fuelexpenselog.app.ui.entry.ExpenseEditorViewModel
+import com.fuelexpenselog.app.ui.entry.FillUpEditorViewModel
 import com.fuelexpenselog.app.ui.garage.GarageViewModel
 import com.fuelexpenselog.app.ui.vehicles.VehicleEditorViewModel
 
@@ -18,6 +20,14 @@ object FuelViewModels {
     val Factory = viewModelFactory {
         initializer { GarageViewModel(container.repository, container.prefs) }
         initializer { VehicleEditorViewModel(createSavedStateHandle(), container.repository, container.prefs) }
+        initializer {
+            val c = container
+            FillUpEditorViewModel(createSavedStateHandle(), c.repository, c.prefs, c.clock, c.zone)
+        }
+        initializer {
+            val c = container
+            ExpenseEditorViewModel(createSavedStateHandle(), c.repository, c.prefs, c.clock, c.zone)
+        }
     }
 
     private val CreationExtras.container: AppContainer

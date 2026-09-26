@@ -1,6 +1,7 @@
 package com.fuelexpenselog.app.ui.vehicles
 
 import android.os.Bundle
+import com.fuelexpenselog.app.format.InputText
 import com.fuelexpenselog.domain.model.EntryTag
 import com.fuelexpenselog.domain.model.FuelType
 import com.fuelexpenselog.domain.model.Vehicle
@@ -9,9 +10,6 @@ import com.fuelexpenselog.domain.model.decodeOr
 import com.fuelexpenselog.domain.unit.ConsumptionFormat
 import com.fuelexpenselog.domain.unit.DistanceUnit
 import com.fuelexpenselog.domain.unit.EnergyUnit
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 /**
@@ -81,14 +79,7 @@ data class VehicleForm(
             active = !vehicle.isArchived,
         )
 
-        /**
-         * A capacity as the user would type it: at most two decimals, no trailing zeros, the
-         * locale's decimal mark. DecimalParser reads it back whichever mark it carries.
-         */
-        fun tankText(value: Double, locale: Locale): String {
-            val plain = BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString()
-            val mark = DecimalFormatSymbols.getInstance(locale).decimalSeparator
-            return if (mark == '.') plain else plain.replace('.', mark)
-        }
+        /** A capacity as the user would type it, to two decimals. */
+        fun tankText(value: Double, locale: Locale): String = InputText.of(value, 2, locale)
     }
 }

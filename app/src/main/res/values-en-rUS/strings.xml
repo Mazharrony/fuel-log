@@ -4,4 +4,5 @@
     <string name="fuel_type_petrol">Gas</string>
     <string name="unit_kilometres_long">Kilometers</string>
     <string name="unit_litres_long">Liters</string>
+    <string name="category_tyres">Tires</string>
 </resources>

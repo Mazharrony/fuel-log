@@ -108,6 +108,82 @@
     </plurals>
     <string name="editor_save">Save vehicle</string>
 
+    <!-- Garage actions -->
+    <string name="garage_add_fillup">Add fill-up</string>
+    <string name="garage_add_expense">Add expense</string>
+
+    <!-- Entry screens, shared -->
+    <string name="date_today">Today · %1$s</string>
+    <string name="cd_change_date">Change date</string>
+    <string name="entry_vehicle">Vehicle</string>
+    <string name="entry_tag">This entry is</string>
+    <string name="entry_note">Note · optional</string>
+    <string name="entry_more">More details</string>
+    <string name="entry_fewer">Fewer details</string>
+    <string name="entry_delete_title">Delete this entry?</string>
+    <string name="entry_delete_body">This cannot be undone.</string>
+    <string name="entry_no_vehicle">Add a vehicle first. Entries are logged against one.</string>
+
+    <!-- Fill-up -->
+    <string name="fillup_title_new">Fill-up</string>
+    <string name="fillup_title_edit">Edit fill-up</string>
+    <string name="fillup_odometer">Odometer · %1$s</string>
+    <string name="fillup_last_reading">Last reading %1$s</string>
+    <string name="fillup_total">Total paid · %1$s</string>
+    <string name="fillup_full_tank">Full tank</string>
+    <string name="fillup_full_on">Filled to the top. This tank gets a figure.</string>
+    <string name="fillup_full_off">Partial. Its fuel counts toward the next full tank.</string>
+    <string name="fillup_missed">I missed a fill-up before this one</string>
+    <string name="fillup_missed_body">The stretch before this entry gets a dash instead of a wrong figure.</string>
+    <string name="fillup_station">Station · optional</string>
+    <string name="fillup_this_tank">This tank</string>
+    <string name="fillup_cost_per">Cost per %1$s</string>
+    <string name="fillup_save">Save fill-up</string>
+    <string name="fillup_delete">Delete this fill-up</string>
+
+    <!-- Expense -->
+    <string name="expense_title_new">Expense</string>
+    <string name="expense_title_edit">Edit expense</string>
+    <string name="expense_amount">Amount · %1$s</string>
+    <string name="expense_category">Category</string>
+    <string name="expense_odometer">Odometer · optional</string>
+    <string name="expense_vendor">Paid to · optional</string>
+    <string name="expense_odometer_hint">Recording the odometer on maintenance is what powers the “last done at” lines. Skip it for insurance or tax.</string>
+    <string name="expense_save">Save expense</string>
+    <string name="expense_delete">Delete this expense</string>
+
+    <!-- Expense categories -->
+    <string name="category_oil_change">Oil change</string>
+    <string name="category_service">Service</string>
+    <string name="category_repair">Repair</string>
+    <string name="category_tyres">Tyres</string>
+    <string name="category_parts">Parts</string>
+    <string name="category_toll">Toll</string>
+    <string name="category_parking">Parking</string>
+    <string name="category_insurance">Insurance</string>
+    <string name="category_tax">Tax</string>
+    <string name="category_fine">Fine</string>
+    <string name="category_wash">Wash</string>
+    <string name="category_other">Other</string>
+
+    <!-- Entry warnings: warn, never block -->
+    <string name="warning_odometer_missing">No odometer reading, so no consumption figure will come from this entry.</string>
+    <string name="warning_odometer_lower">Lower than the last reading, %1$s. It still saves: the odometer may have been replaced, or a digit mistyped.</string>
+    <string name="warning_volume_over_tank">More than this vehicle\'s tank holds. It still saves: a jerry can counts too.</string>
+    <string name="warning_volume_zero">A volume of zero adds nothing to the tank.</string>
+    <string name="warning_future_date">This date is in the future.</string>
+    <string name="warning_duplicate">This looks like a fill-up already logged at the same time and reading.</string>
+    <string name="warning_implausible">This tank\'s figure is far outside the usual range. It will be shown, marked.</string>
+
+    <!-- Why a span has no figure -->
+    <string name="gap_first_fill_up">Needs two full tanks</string>
+    <string name="gap_missed_fill_up">A fill-up in this stretch was not recorded</string>
+    <string name="gap_partial_only">Partial fills only. The figure arrives with the next full tank.</string>
+    <string name="gap_odometer_reset">The odometer was reset here</string>
+    <string name="gap_missing_odometer">No odometer readings in this stretch</string>
+    <string name="gap_zero_distance">The readings do not move forward here</string>
+    <string name="gap_no_energy">A full tank with no volume recorded</string>
+
     <!-- Currency picker -->
     <string name="currency_picker_title">Currency</string>
     <string name="currency_search">Search by code or name</string>

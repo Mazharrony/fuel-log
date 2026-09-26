@@ -64,7 +64,8 @@ fun SquareToggle(checked: Boolean, modifier: Modifier = Modifier, ink: Color = F
  * A title, an optional explanation, and the toggle, as one switch for TalkBack.
  *
  * [highlight] is the full-tank treatment: the row itself turns yellow when on, crossfading
- * over the same 140ms the knob takes to travel. Otherwise the row is outlined.
+ * over the same 140ms the knob takes to travel, inside an ink outline. Otherwise the outline
+ * is the quieter grey.
  */
 @Composable
 fun ToggleRow(
@@ -91,10 +92,10 @@ fun ToggleRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = Dimens.minTouchTarget)
-            .then(if (highlight) Modifier else Modifier.border(Dimens.hairline, colors.outlineStrong))
             .background(background)
+            .border(Dimens.hairline, if (highlight) colors.textPrimary else colors.outlineStrong)
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
-            .padding(horizontal = if (highlight) Dimens.gutter else 16.dp, vertical = 15.dp),
+            .padding(horizontal = 16.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

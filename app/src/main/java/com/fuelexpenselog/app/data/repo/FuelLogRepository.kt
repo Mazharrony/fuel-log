@@ -91,6 +91,27 @@ class FuelLogRepository(
     fun observeHistory(vehicleId: Long): Flow<List<HistoryEntry>> =
         combine(observeFillUps(vehicleId), observeExpenses(vehicleId), ::buildHistory)
 
+    suspend fun fillUp(id: Long): FillUp? = fillUps.byId(id)?.toDomain()
+
+    suspend fun expense(id: Long): Expense? = expenses.byId(id)?.toDomain()
+
+    fun observeSegments(vehicleId: Long): Flow<List<DeclaredSegment>> =
+        segments.observeForVehicle(vehicleId).map { list -> list.map { it.toDomain() } }
+
+    /**
+     * The highest reading recorded for the vehicle, from fill-ups and expenses both, leaving
+     * out the entry being edited. It is what a new reading is warned against, and the hint
+     * shown under an empty odometer field.
+     */
+    fun observePreviousOdometer(
+        vehicleId: Long,
+        excludingFillUpId: Long = 0,
+        excludingExpenseId: Long = 0,
+    ): Flow<Long?> = combine(
+        fillUps.observeMaxOdometerExcluding(vehicleId, excludingFillUpId),
+        expenses.observeMaxOdometerExcluding(vehicleId, excludingExpenseId),
+    ) { fromFuel, fromCost -> maxOfNullable(fromFuel, fromCost) }
+
     suspend fun addFillUp(fillUp: FillUp): Long = fillUps.insert(fillUp.toEntity(now()))
 
     suspend fun updateFillUp(fillUp: FillUp) {

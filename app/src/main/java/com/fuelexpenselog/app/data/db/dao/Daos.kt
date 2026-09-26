@@ -102,6 +102,14 @@ interface FillUpDao {
     suspend fun maxOdometer(vehicleId: Long): Long?
 
     /**
+     * The reading an entry is compared against, leaving out the row being edited - otherwise
+     * lowering the latest fill-up's own mistyped reading would warn against itself. Still a
+     * search on the (vehicleId, odometerM) index.
+     */
+    @Query("SELECT MAX(odometerM) FROM fill_up WHERE vehicleId = :vehicleId AND id != :excludingId")
+    fun observeMaxOdometerExcluding(vehicleId: Long, excludingId: Long): Flow<Long?>
+
+    /**
      * A half-kilometre and half-day window catches a genuine double-entry without flagging
      * two real stops on one day. The result is a WARNING; it never blocks a save.
      */
@@ -193,6 +201,9 @@ interface ExpenseDao {
 
     @Query("SELECT MAX(odometerM) FROM expense WHERE vehicleId = :vehicleId")
     suspend fun maxOdometer(vehicleId: Long): Long?
+
+    @Query("SELECT MAX(odometerM) FROM expense WHERE vehicleId = :vehicleId AND id != :excludingId")
+    fun observeMaxOdometerExcluding(vehicleId: Long, excludingId: Long): Flow<Long?>
 
     @Query("SELECT * FROM expense ORDER BY id ASC")
     suspend fun all(): List<ExpenseEntity>

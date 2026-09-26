@@ -80,6 +80,20 @@ class SchemaAndQueryPlanTest {
     }
 
     @Test
+    fun `the previous reading, leaving out the row being edited, is still an index search`() {
+        // Runs on every keystroke-driven re-validation of an entry being edited.
+        val fuel = plan("SELECT MAX(odometerM) FROM fill_up WHERE vehicleId = 1 AND id != 7")
+        assertThat(fuel).contains("index_fill_up_vehicleId_odometerM")
+        assertThat(fuel.uppercase()).doesNotContain("SCAN FILL_UP")
+
+        // Expenses have no odometer index (schema stays at v1): a vehicle's own rows through
+        // the vehicle index is enough at a few hundred rows, a full table scan is not.
+        val cost = plan("SELECT MAX(odometerM) FROM expense WHERE vehicleId = 1 AND id != 7")
+        assertThat(cost).contains("USING INDEX")
+        assertThat(cost.uppercase()).doesNotContain("SCAN EXPENSE")
+    }
+
+    @Test
     fun `the business-personal tax export does not scan the table`() {
         assertUsesIndex(
             "tagged range",

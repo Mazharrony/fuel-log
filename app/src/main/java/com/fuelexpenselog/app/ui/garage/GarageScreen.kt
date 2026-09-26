@@ -35,6 +35,7 @@ import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
+import com.fuelexpenselog.app.ui.common.SplitActionBar
 import com.fuelexpenselog.app.ui.common.bottomHairline
 import com.fuelexpenselog.app.ui.common.dashOr
 import com.fuelexpenselog.app.ui.common.label
@@ -46,6 +47,8 @@ import com.fuelexpenselog.app.ui.theme.FuelTheme
 fun GarageRoute(
     onAddVehicle: () -> Unit,
     onOpenVehicle: (Long) -> Unit,
+    onAddFillUp: () -> Unit,
+    onAddExpense: () -> Unit,
     viewModel: GarageViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -54,6 +57,8 @@ fun GarageRoute(
         onAddVehicle = onAddVehicle,
         onOpenVehicle = onOpenVehicle,
         onToggleArchived = viewModel::toggleArchived,
+        onAddFillUp = onAddFillUp,
+        onAddExpense = onAddExpense,
     )
 }
 
@@ -64,12 +69,25 @@ fun GarageScreen(
     onAddVehicle: () -> Unit,
     onOpenVehicle: (Long) -> Unit,
     onToggleArchived: () -> Unit,
+    onAddFillUp: () -> Unit = {},
+    onAddExpense: () -> Unit = {},
 ) {
     FuelScreen {
         GarageHeader()
         when (state) {
             GarageUiState.Loading -> Unit
-            is GarageUiState.Ready -> GarageList(state, onAddVehicle, onOpenVehicle, onToggleArchived)
+            is GarageUiState.Ready -> {
+                GarageList(state, onAddVehicle, onOpenVehicle, onToggleArchived, Modifier.weight(1f))
+                // Entries need a vehicle to belong to; with none active there is nothing to log.
+                if (state.active.isNotEmpty()) {
+                    SplitActionBar(
+                        primary = stringResource(R.string.garage_add_fillup),
+                        onPrimary = onAddFillUp,
+                        secondary = stringResource(R.string.garage_add_expense),
+                        onSecondary = onAddExpense,
+                    )
+                }
+            }
         }
     }
 }
@@ -117,9 +135,10 @@ private fun GarageList(
     onAddVehicle: () -> Unit,
     onOpenVehicle: (Long) -> Unit,
     onToggleArchived: () -> Unit,
+    modifier: Modifier,
 ) {
     val colors = FuelTheme.colors
-    LazyColumn(Modifier.fillMaxWidth()) {
+    LazyColumn(modifier.fillMaxWidth()) {
         if (state.active.isEmpty() && state.archived.isEmpty()) {
             item(key = "empty") {
                 Text(

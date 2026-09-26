@@ -1,5 +1,6 @@
 package com.fuelexpenselog.domain.time
 
+import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -58,6 +59,9 @@ value class CivilDate(val value: Int) : Comparable<CivilDate> {
         /** The zone is a parameter, never `ZoneId.systemDefault()` read in here. Bucketing
          *  that depends on ambient state cannot be tested deterministically. */
         fun today(zone: ZoneId): CivilDate = of(LocalDate.now(zone))
+
+        /** "Today" by an injected clock, read in [zone]. What every screen should call. */
+        fun today(clock: Clock, zone: ZoneId): CivilDate = of(LocalDate.now(clock.withZone(zone)))
 
         /** Null rather than an exception for values arriving from a database or a CSV. */
         fun parseOrNull(value: Int): CivilDate? =

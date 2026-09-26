@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +33,10 @@ import com.fuelexpenselog.app.R
 import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
 import com.fuelexpenselog.app.ui.common.ChipGroup
+import com.fuelexpenselog.app.ui.common.ConfirmDialog
 import com.fuelexpenselog.app.ui.common.CurrencyField
+import com.fuelexpenselog.app.ui.common.DiscardDialog
+import com.fuelexpenselog.app.ui.common.ErrorDialog
 import com.fuelexpenselog.app.ui.common.FuelScreen
 import com.fuelexpenselog.app.ui.common.NavHeader
 import com.fuelexpenselog.app.ui.common.Note
@@ -284,35 +285,16 @@ fun VehicleEditorScreen(
     }
 
     if (confirmDiscard) {
-        AlertDialog(
-            onDismissRequest = { confirmDiscard = false },
-            title = { Text(stringResource(R.string.discard_title)) },
-            text = { Text(stringResource(R.string.discard_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDiscard = false
-                    onBack()
-                }) { Text(stringResource(R.string.action_discard), color = colors.danger) }
+        DiscardDialog(
+            onDiscard = {
+                confirmDiscard = false
+                onBack()
             },
-            dismissButton = {
-                TextButton(onClick = { confirmDiscard = false }) {
-                    Text(stringResource(R.string.action_keep_editing), color = colors.textPrimary)
-                }
-            },
+            onKeepEditing = { confirmDiscard = false },
         )
     }
 
-    state.error?.let { message ->
-        AlertDialog(
-            onDismissRequest = actions.onDismissError,
-            text = { Text(stringResource(R.string.save_failed, message)) },
-            confirmButton = {
-                TextButton(onClick = actions.onDismissError) {
-                    Text(stringResource(android.R.string.ok), color = colors.textPrimary)
-                }
-            },
-        )
-    }
+    state.error?.let { ErrorDialog(it, actions.onDismissError) }
 }
 
 @Composable
@@ -352,21 +334,17 @@ private fun DeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val colors = FuelTheme.colors
     val body = if (entryCount == 0) {
         stringResource(R.string.editor_delete_body_empty)
     } else {
         pluralStringResource(R.plurals.editor_delete_body, entryCount, NumberFormat.getIntegerInstance(locale).format(entryCount))
     }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.editor_delete_title, name)) },
-        text = { Text(body) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text(stringResource(R.string.action_delete), color = colors.danger) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), color = colors.textPrimary) }
-        },
+    ConfirmDialog(
+        title = stringResource(R.string.editor_delete_title, name),
+        body = body,
+        confirm = stringResource(R.string.action_delete),
+        danger = true,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
 }

@@ -161,4 +161,12 @@ class CivilDateTest {
         val local = LocalDate.of(2026, 9, 19)
         assertThat(CivilDate.of(local).toLocalDate()).isEqualTo(local)
     }
+
+    @Test
+    fun `today comes from the injected clock, read in the given zone`() {
+        // 23:30 UTC on 1 March is already 2 March in Athens and still 1 March in New York.
+        val clock = java.time.Clock.fixed(java.time.Instant.parse("2026-03-01T23:30:00Z"), ZoneId.of("UTC"))
+        assertThat(CivilDate.today(clock, ZoneId.of("Europe/Athens"))).isEqualTo(CivilDate.of(2026, 3, 2))
+        assertThat(CivilDate.today(clock, ZoneId.of("America/New_York"))).isEqualTo(CivilDate.of(2026, 3, 1))
+    }
 }

@@ -57,4 +57,12 @@ Emulator: AVD `Pixel_9_Pro_XL` (API 36), `emulator-5554`. adb lives in
 
 Domain tests are plain JUnit. App tests run under Robolectric (`sdk=26,34`,
 `graphicsMode=NATIVE`); Compose tests need `ComposeHostRule` at `order = 0` before
-`createComposeRule()`. ViewModel tests use `MainDispatcherRule` and `TestDb`.
+`createComposeRule()`. ViewModel tests use `MainDispatcherRule` and `TestDb`. A Compose test
+that drives a real ViewModel must idle the main looper while it waits for Room (see
+`FillUpEditorScreenTest.awaitMainLooper`): `waitUntil` only sleeps.
+
+Any "today" comes from `CivilDate.today(clock, zone)` with the container's clock - the
+zone-only overload reads the system clock and makes tests depend on the date they run.
+
+The user may be trying the app on the emulator at the same time: never `pm clear` without
+asking, and keep adb driving short.
