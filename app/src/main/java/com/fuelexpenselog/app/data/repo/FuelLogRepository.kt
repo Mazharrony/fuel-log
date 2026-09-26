@@ -26,15 +26,22 @@ import kotlinx.coroutines.flow.map
  * each other, which users read as the app being broken.
  */
 class FuelLogRepository(
-    private val db: FuelLogDatabase,
+    /**
+     * A provider, not an instance: restoring a backup closes the live database and opens the
+     * restored file, and every DAO below must follow it there without anyone holding a
+     * reference to the old one.
+     */
+    private val database: () -> FuelLogDatabase,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
 
-    private val vehicles = db.vehicleDao()
-    private val fillUps = db.fillUpDao()
-    private val expenses = db.expenseDao()
-    private val segments = db.odometerSegmentDao()
-    private val batches = db.importBatchDao()
+    constructor(db: FuelLogDatabase, now: () -> Long = System::currentTimeMillis) : this({ db }, now)
+
+    private val vehicles get() = database().vehicleDao()
+    private val fillUps get() = database().fillUpDao()
+    private val expenses get() = database().expenseDao()
+    private val segments get() = database().odometerSegmentDao()
+    private val batches get() = database().importBatchDao()
 
     // -- vehicles ------------------------------------------------------------------------
 
@@ -56,10 +63,22 @@ class FuelLogRepository(
         vehicles.update(vehicle.toEntity())
     }
 
+    /**
+     * A targeted UPDATE of one column, deliberately not [updateVehicle]: a vehicle this build
+     * cannot fully read must still be hideable, and a full-row update would write this
+     * build's guess over the unit it does not understand.
+     */
+    suspend fun setVehicleArchived(id: Long, archived: Boolean) {
+        vehicles.setArchived(id, archived)
+    }
+
     /** Cascades to every fill-up, expense, reminder and segment. There is no undo. */
     suspend fun deleteVehicle(vehicle: Vehicle) {
         vehicles.byId(vehicle.id)?.let { vehicles.delete(it) }
     }
+
+    /** Fill-ups plus expenses: the number the delete confirmation has to name. */
+    fun observeEntryCount(vehicleId: Long): Flow<Int> = observeHistory(vehicleId).map { it.size }
 
     // -- entries -------------------------------------------------------------------------
 

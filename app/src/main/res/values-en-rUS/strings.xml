@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- US English only where American usage genuinely differs. -->
+<resources>
+    <string name="fuel_type_petrol">Gas</string>
+    <string name="unit_kilometres_long">Kilometers</string>
+    <string name="unit_litres_long">Liters</string>
+</resources>

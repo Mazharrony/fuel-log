@@ -49,6 +49,9 @@ interface VehicleDao {
     @Update
     suspend fun update(vehicle: VehicleEntity)
 
+    @Query("UPDATE vehicle SET isArchived = :archived WHERE id = :id")
+    suspend fun setArchived(id: Long, archived: Boolean)
+
     /** Cascades to every fill-up, expense, reminder and segment. There is no undo. */
     @Delete
     suspend fun delete(vehicle: VehicleEntity)

@@ -26,4 +26,29 @@ object Dimens {
     val chartBarGap = 7.dp
     val sparklineHeight = 26.dp
     val sparklineBarGap = 4.dp
+
+    /** The type bar down the left of an entry row: yellow fill-up, grey partial, ink expense. */
+    val entryBar = 3.dp
+
+    val toggleWidth = 52.dp
+    val toggleHeight = 28.dp
+    val toggleKnobWidth = 22.dp
+    val toggleKnobHeight = 20.dp
+
+    val underlineFocused = 2.dp
+    val underlineResting = 1.dp
+
+    /** The yellow bar that stands in for a caret beside a figure input. */
+    val caretWidth = 2.dp
+
+    val warningRule = 3.dp
+    val splitBar = 8.dp
+    val categoryBar = 6.dp
+    val statusDot = 7.dp
+
+    /** Glyphs sit in 48dp boxes; the drawn stroke is 20dp. */
+    val icon = 20.dp
+
+    /** Last-N spans on the chart and the sparkline. */
+    const val CHART_BARS = 9
 }

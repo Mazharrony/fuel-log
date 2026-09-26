@@ -69,6 +69,11 @@ android {
         }
     }
 
+    // MigrationTestHelper reads `<database class>/<version>.json` from assets. Local unit
+    // tests only see the TESTED variant's merged assets - a `test` source-set asset dir is
+    // silently ignored - so the committed schemas are debug assets. Release never carries them.
+    sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")
+
     packaging {
         resources.excludes += setOf(
             "META-INF/AL2.0",
@@ -110,6 +115,12 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.room.testing)
+
+    // Compose tests run under Robolectric, never as debugImplementation: androidx.test:core's
+    // AAR declares REORDER_TASKS, and the permission ratchet would rightly fail the debug build.
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.compose.ui.test.manifest)
+    testImplementation(libs.androidx.test.espresso.core)
 }
 
 // ---------------------------------------------------------------------------------------

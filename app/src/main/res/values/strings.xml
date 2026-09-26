@@ -1,4 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!--
+  The app ships in English only. values-en-rUS overrides the handful of words American
+  English says differently, and lint would otherwise read that partial file as an
+  incomplete English translation of everything here.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Fuel Log</string>
+
+    <!-- Shared -->
+    <string name="value_with_unit">%1$s %2$s</string>
+    <string name="cd_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_keep_editing">Keep editing</string>
+    <string name="discard_title">Discard changes?</string>
+    <string name="discard_body">What you typed here has not been saved.</string>
+    <string name="unreadable_badge">Created by a newer version</string>
+    <string name="save_failed">Could not save. %1$s</string>
+
+    <!-- Units -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+    <string name="unit_litre">L</string>
+    <string name="unit_us_gal">gal</string>
+    <string name="unit_uk_gal">UK gal</string>
+    <string name="unit_kwh">kWh</string>
+    <string name="unit_kilometres_long">Kilometres</string>
+    <string name="unit_miles_long">Miles</string>
+    <string name="unit_litres_long">Litres</string>
+    <string name="unit_us_gallons_long">US gallons</string>
+    <string name="unit_uk_gallons_long">UK gallons</string>
+
+    <!-- Consumption formats -->
+    <string name="format_l_per_100km">L/100 km</string>
+    <string name="format_km_per_l">km/L</string>
+    <string name="format_mpg_us">MPG (US)</string>
+    <string name="format_mpg_uk">MPG (UK)</string>
+    <string name="format_kwh_per_100km">kWh/100 km</string>
+    <string name="format_km_per_kwh">km/kWh</string>
+    <string name="format_mi_per_kwh">mi/kWh</string>
+    <string name="format_app_default">App default</string>
+
+    <!-- Vehicle and fuel types -->
+    <string name="vehicle_type_car">Car</string>
+    <string name="vehicle_type_bike">Motorbike</string>
+    <string name="vehicle_type_van">Van</string>
+    <string name="vehicle_type_other">Other</string>
+    <string name="fuel_type_petrol">Petrol</string>
+    <string name="fuel_type_diesel">Diesel</string>
+    <string name="fuel_type_lpg">LPG</string>
+    <string name="fuel_type_cng">CNG</string>
+    <string name="fuel_type_hybrid">Hybrid</string>
+    <string name="fuel_type_plugin_hybrid">Plug-in hybrid</string>
+    <string name="fuel_type_electric">Electric</string>
+    <string name="fuel_type_other">Other</string>
+
+    <!-- Tags -->
+    <string name="tag_personal">Personal</string>
+    <string name="tag_business">Business</string>
+
+    <!-- Garage -->
+    <string name="garage_title">Garage</string>
+    <string name="garage_offline">Offline</string>
+    <string name="garage_add_vehicle">Add vehicle</string>
+    <string name="garage_needs_two_full_tanks">Needs two full tanks</string>
+    <string name="garage_empty">Add the vehicle you want to track. Fill-ups and costs are logged against it.</string>
+    <plurals name="garage_show_archived">
+        <item quantity="one">Show %d archived vehicle</item>
+        <item quantity="other">Show %d archived vehicles</item>
+    </plurals>
+    <string name="garage_hide_archived">Hide archived vehicles</string>
+    <string name="garage_archived">Archived</string>
+
+    <!-- Vehicle editor -->
+    <string name="editor_title_new">New vehicle</string>
+    <string name="editor_title_edit">Vehicle</string>
+    <plurals name="editor_entry_count">
+        <item quantity="one">%s entry</item>
+        <item quantity="other">%s entries</item>
+    </plurals>
+    <string name="editor_name">Name</string>
+    <string name="editor_name_placeholder">e.g. Honda Civic</string>
+    <string name="editor_distance">Distance</string>
+    <string name="editor_volume">Volume</string>
+    <string name="editor_currency">Currency</string>
+    <string name="editor_tank">Tank · optional</string>
+    <string name="editor_tank_unreadable">Not read as a number, so no capacity will be saved.</string>
+    <string name="editor_type">Type</string>
+    <string name="editor_fuel">Fuel</string>
+    <string name="editor_default_tag">New entries are</string>
+    <string name="editor_format">Consumption shown as</string>
+    <string name="editor_active">Active</string>
+    <string name="editor_active_body">Turn off to hide a sold vehicle, keeping its history</string>
+    <string name="editor_units_note">Changing units converts nothing on disk. Every entry is stored once, in metric, and only the display changes.</string>
+    <string name="editor_unreadable_body">This vehicle holds a value this version of the app cannot read, so it cannot be edited here. You can still hide it or delete it.</string>
+    <string name="editor_delete_empty">Delete vehicle</string>
+    <plurals name="editor_delete">
+        <item quantity="one">Delete vehicle and its %s entry</item>
+        <item quantity="other">Delete vehicle and its %s entries</item>
+    </plurals>
+    <string name="editor_delete_title">Delete %1$s?</string>
+    <string name="editor_delete_body_empty">This cannot be undone.</string>
+    <plurals name="editor_delete_body">
+        <item quantity="one">Its %s entry goes with it. This cannot be undone.</item>
+        <item quantity="other">All %s of its entries go with it. This cannot be undone.</item>
+    </plurals>
+    <string name="editor_save">Save vehicle</string>
+
+    <!-- Currency picker -->
+    <string name="currency_picker_title">Currency</string>
+    <string name="currency_search">Search by code or name</string>
 </resources>

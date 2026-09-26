@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The static splash mark for API 26-30, which have no splash screen API: the 112dp ink tile
+  with a 26dp radius and the 54dp yellow gauge, needle at full. Composed onto the yellow
+  ground by splash_window.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="112dp"
+    android:height="112dp"
+    android:viewportWidth="112"
+    android:viewportHeight="112">
+
+    <path
+        android:fillColor="#16181C"
+        android:pathData="M26,0 H86 A26,26 0 0 1 112,26 V86 A26,26 0 0 1 86,112 H26 A26,26 0 0 1 0,86 V26 A26,26 0 0 1 26,0 Z" />
+
+    <group
+        android:translateX="29"
+        android:translateY="29"
+        android:scaleX="2.25"
+        android:scaleY="2.25">
+        <path
+            android:pathData="M4.5 16.5a8 8 0 1 1 15 0"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M6.6 9.3 7.6 10.4"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M12 5.2V6.7"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M17.4 9.3 16.4 10.4"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M12 16.5 16.2 10.8"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M12 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0 -3z"
+            android:fillColor="#F5C518" />
+    </group>
+</vector>

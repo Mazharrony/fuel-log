@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 26-30 launch window: the yellow ground with the tile centred. No animation, no wait. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/brand_yellow" />
+    <item
+        android:width="112dp"
+        android:height="112dp"
+        android:drawable="@drawable/splash_tile"
+        android:gravity="center" />
+</layer-list>

@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.FuelLog" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/paper</item>
+    </style>
+
+    <!--
+      The launch theme. MainActivity swaps to Theme.FuelLog before super.onCreate, so this
+      only ever paints the window that exists while the process starts. On API 26-30 that
+      window IS the splash: the yellow ground and the tile, static, gone as soon as Garage
+      draws. API 31+ overrides this in values-v31 with the platform splash screen.
+    -->
+    <style name="Theme.FuelLog.Starting">
+        <item name="android:windowBackground">@drawable/splash_window</item>
+        <item name="android:statusBarColor">@color/brand_yellow</item>
+        <item name="android:navigationBarColor">@color/brand_yellow</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Ignored on API 26, which has no light navigation bar. -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 </resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The API 31+ splash icon: the ink tile with the yellow gauge, animated by splash_icon.xml.
+
+  The platform draws this at 288dp and masks it to a 192dp circle, so the tile is part of
+  the vector rather than an icon background colour - a background colour would be clipped
+  to a circle, and the handoff's tile is a rounded square. At 288dp one viewport unit is
+  2.67dp: the tile is 112dp with a 26dp radius, the glyph 54dp, as in the design.
+
+  The needle starts at -78deg (empty) because that is the sweep's first keyframe; with
+  animations off the animator jumps straight to its end value, which is full.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#16181C"
+        android:pathData="M42.75,33 H65.25 A9.75,9.75 0 0 1 75,42.75 V65.25 A9.75,9.75 0 0 1 65.25,75 H42.75 A9.75,9.75 0 0 1 33,65.25 V42.75 A9.75,9.75 0 0 1 42.75,33 Z" />
+
+    <group
+        android:translateX="43.875"
+        android:translateY="43.875"
+        android:scaleX="0.84375"
+        android:scaleY="0.84375">
+        <path
+            android:pathData="M4.5 16.5a8 8 0 1 1 15 0"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M6.6 9.3 7.6 10.4"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M12 5.2V6.7"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M17.4 9.3 16.4 10.4"
+            android:strokeColor="#F5C518"
+            android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <group
+            android:name="needle"
+            android:pivotX="12"
+            android:pivotY="16.5"
+            android:rotation="-78">
+            <path
+                android:pathData="M12 16.5 16.2 10.8"
+                android:strokeColor="#F5C518"
+                android:strokeWidth="2"
+                android:strokeLineCap="round" />
+        </group>
+        <path
+            android:pathData="M12 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0 -3z"
+            android:fillColor="#F5C518" />
+    </group>
+</vector>

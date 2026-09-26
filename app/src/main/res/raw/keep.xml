@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The font's licence travels with the font, as the OFL requires. Nothing references it from
+  code, so without this the release build's resource shrinker would quietly drop it.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/instrument_sans_ofl" />

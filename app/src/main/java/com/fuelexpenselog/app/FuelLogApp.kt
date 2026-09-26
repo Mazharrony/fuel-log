@@ -2,8 +2,12 @@ package com.fuelexpenselog.app
 
 import android.app.Application
 import android.os.StrictMode
+import com.fuelexpenselog.app.di.AppContainer
 
 class FuelLogApp : Application() {
+
+    /** Lazy, so a cold start pays for nothing until the first screen asks. */
+    val container: AppContainer by lazy { AppContainer(this) }
 
     override fun onCreate() {
         super.onCreate()
