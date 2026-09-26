@@ -394,4 +394,77 @@
     <!-- Currency picker -->
     <string name="currency_picker_title">Currency</string>
     <string name="currency_search">Search by code or name</string>
+
+    <!-- Reminders -->
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_empty">Nothing here yet. Add the jobs that come round again, like an oil change, a service or the insurance, and they show here as they come due.</string>
+    <string name="reminders_add">Add reminder</string>
+    <string name="reminder_done_action">Done</string>
+    <string name="cd_reminder_done">Mark %1$s done</string>
+
+    <!-- A reminder's standing. A dash, never "overdue", when there is nothing to count from. -->
+    <plurals name="reminder_days">
+        <item quantity="one">%s day</item>
+        <item quantity="other">%s days</item>
+    </plurals>
+    <plurals name="reminder_months">
+        <item quantity="one">%s month</item>
+        <item quantity="other">%s months</item>
+    </plurals>
+    <string name="reminder_or">%1$s or %2$s</string>
+    <string name="reminder_and">%1$s and %2$s</string>
+    <string name="reminder_every">Every %1$s</string>
+    <string name="reminder_overdue">%1$s overdue</string>
+    <string name="reminder_due_in">Due in %1$s</string>
+    <string name="reminder_due_today">Due today</string>
+    <string name="reminder_due_now">Due now</string>
+    <string name="reminder_due_on">Due %1$s</string>
+    <string name="reminder_due_at">Due at %1$s</string>
+    <string name="reminder_due_on_or_at">Due %1$s or at %2$s</string>
+    <string name="reminder_unknown">No odometer reading to count from yet</string>
+
+    <!-- Reminder editor -->
+    <string name="reminder_title_new">New reminder</string>
+    <string name="reminder_title_edit">Edit reminder</string>
+    <string name="reminder_name">Name</string>
+    <string name="reminder_logs_as">Logs its cost as</string>
+    <string name="reminder_counts">Comes round by</string>
+    <string name="reminder_kind_date">Time</string>
+    <string name="reminder_kind_distance">Distance</string>
+    <string name="reminder_kind_both">Either</string>
+    <string name="reminder_every_months">Every · months</string>
+    <string name="reminder_every_distance">Every · %1$s</string>
+    <string name="reminder_last_done">Last done</string>
+    <string name="reminder_last_odometer">Odometer · %1$s</string>
+    <string name="reminder_last_reading">Last reading %1$s. Used if left empty.</string>
+    <string name="reminder_next">Next</string>
+    <string name="reminder_hint">The next one counts from the last time it was done. Marking it done moves it on.</string>
+    <string name="reminder_save">Save reminder</string>
+    <string name="reminder_delete">Delete this reminder</string>
+    <string name="reminder_delete_title">Delete this reminder?</string>
+    <string name="reminder_delete_body">The expenses it logged stay in the history.</string>
+    <string name="reminder_history">Done before</string>
+
+    <!-- Marking a reminder done -->
+    <string name="reminder_done_cost">Cost · %1$s · optional</string>
+    <string name="reminder_done_odometer">Odometer · %1$s · optional</string>
+    <string name="reminder_done_hint">With a cost, it is logged as an expense too.</string>
+    <string name="reminder_done_save">Mark done</string>
+
+    <!-- Reminders on the vehicle and in the garage -->
+    <string name="vehicle_due">Due</string>
+    <string name="vehicle_reminders">Reminders</string>
+    <plurals name="vehicle_reminders_count">
+        <item quantity="one">%s active</item>
+        <item quantity="other">%s active</item>
+    </plurals>
+    <string name="vehicle_reminders_none">Add one</string>
+    <plurals name="garage_due">
+        <item quantity="one">%s reminder due</item>
+        <item quantity="other">%s reminders due</item>
+    </plurals>
+    <plurals name="garage_overdue">
+        <item quantity="one">%s reminder overdue</item>
+        <item quantity="other">%s reminders overdue</item>
+    </plurals>
 </resources>

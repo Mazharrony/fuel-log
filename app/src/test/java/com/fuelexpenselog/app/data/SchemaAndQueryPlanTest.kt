@@ -126,6 +126,15 @@ class SchemaAndQueryPlanTest {
     }
 
     @Test
+    fun `the daily alarm's scan walks the notify index and needs no sort`() {
+        // Runs every morning for everyone who opted in, across every vehicle at once.
+        val plan = plan("SELECT * FROM reminder WHERE isActive = 1 AND notifyEnabled = 1 ORDER BY dueLocalDate ASC")
+        assertThat(plan).contains("index_reminder_isActive_notifyEnabled_dueLocalDate")
+        assertThat(plan.uppercase()).doesNotContain("SCAN REMINDER")
+        assertThat(plan.uppercase()).doesNotContain("USE TEMP B-TREE")
+    }
+
+    @Test
     fun `the duplicate probe on re-import uses the hash index`() {
         val plan = plan("SELECT COUNT(*) FROM fill_up WHERE importRowHash = 'abc'")
         assertThat(plan).contains("USING")

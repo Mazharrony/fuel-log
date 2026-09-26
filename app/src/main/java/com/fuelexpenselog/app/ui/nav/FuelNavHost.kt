@@ -21,6 +21,9 @@ import com.fuelexpenselog.app.ui.history.HistoryRoute
 import com.fuelexpenselog.app.ui.months.MonthDetailRoute
 import com.fuelexpenselog.app.ui.months.MonthsRoute
 import com.fuelexpenselog.app.ui.onboarding.OnboardingRoute
+import com.fuelexpenselog.app.ui.reminders.ReminderDoneRoute
+import com.fuelexpenselog.app.ui.reminders.ReminderEditorRoute
+import com.fuelexpenselog.app.ui.reminders.RemindersRoute
 import com.fuelexpenselog.app.ui.settings.CollectsScreen
 import com.fuelexpenselog.app.ui.settings.SettingsRoute
 import com.fuelexpenselog.app.ui.stats.StatisticsRoute
@@ -119,9 +122,23 @@ fun FuelNavHost(onboarded: Boolean, navController: NavHostController = rememberN
                     onOpenFillUp = { navController.navigate(Routes.fillUpEdit(it)) },
                     onAddFillUp = { navController.navigate(Routes.fillUpNew(it)) },
                     onAddExpense = { navController.navigate(Routes.expenseNew(it)) },
+                    onReminders = { navController.navigate(Routes.reminders(it)) },
+                    onOpenReminder = { navController.navigate(Routes.reminderEdit(it)) },
+                    onReminderDone = { navController.navigate(Routes.reminderDone(it)) },
                 ),
             )
         }
+        composable(Routes.REMINDERS, arguments = listOf(idArg)) {
+            RemindersRoute(
+                onBack = back,
+                onAdd = { navController.navigate(Routes.reminderNew(it)) },
+                onOpen = { navController.navigate(Routes.reminderEdit(it)) },
+                onDone = { navController.navigate(Routes.reminderDone(it)) },
+            )
+        }
+        composable(Routes.REMINDER_NEW, arguments = listOf(vehicleArg)) { ReminderEditorRoute(onDone = back) }
+        composable(Routes.REMINDER_EDIT, arguments = listOf(idArg)) { ReminderEditorRoute(onDone = back) }
+        composable(Routes.REMINDER_DONE, arguments = listOf(idArg)) { ReminderDoneRoute(onDone = back) }
         composable(Routes.VEHICLE_EDIT, arguments = listOf(idArg)) { VehicleEditorRoute(onDone = back) }
         composable(Routes.HISTORY, arguments = listOf(idArg, monthArg)) {
             HistoryRoute(onBack = back, onOpenEntry = openEntry)

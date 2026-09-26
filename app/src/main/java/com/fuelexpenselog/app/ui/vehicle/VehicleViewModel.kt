@@ -16,6 +16,9 @@ import com.fuelexpenselog.domain.model.ExpenseCategory
 import com.fuelexpenselog.domain.model.HistoryEntry
 import com.fuelexpenselog.domain.model.Vehicle
 import com.fuelexpenselog.domain.money.Money
+import com.fuelexpenselog.domain.reminder.Reminder
+import com.fuelexpenselog.domain.reminder.ReminderEvaluator
+import com.fuelexpenselog.domain.reminder.ReminderStatus
 import com.fuelexpenselog.domain.stats.Delta
 import com.fuelexpenselog.domain.stats.LastDone
 import com.fuelexpenselog.domain.stats.StatsCalculator
@@ -51,7 +54,12 @@ data class VehicleUiState(
     val sameDayConflicts: Set<Long> = emptySet(),
     /** Active vehicles, for the switcher. */
     val vehicles: List<Vehicle> = emptyList(),
-)
+    /** Active reminders against the current reading, most urgent first. */
+    val reminders: List<Pair<Reminder, ReminderStatus>> = emptyList(),
+) {
+    /** The rows at the top of the screen: what is due soon or overdue. */
+    val due: List<Pair<Reminder, ReminderStatus>> get() = reminders.filter { it.second.isDue }
+}
 
 /** One vehicle's figures, history, maintenance and pending odometer questions. */
 class VehicleViewModel(
@@ -71,7 +79,8 @@ class VehicleViewModel(
         prefs.observeDismissedProposals(),
         repository.observeVehicles().map { list -> list.filter { !it.isArchived } },
         sameDayConflicts,
-    ) { snapshot, dismissed, vehicles, conflicts ->
+        repository.observeReminders(vehicleId),
+    ) { snapshot, dismissed, vehicles, conflicts, reminders ->
         if (snapshot == null) return@combine VehicleUiState(loading = false, missing = true)
         val today = CivilDate.today(clock, zone())
         val month = today.monthKey
@@ -94,6 +103,7 @@ class VehicleViewModel(
             proposals = proposals,
             sameDayConflicts = conflicts + sameDayRollovers(snapshot.history, proposals),
             vehicles = vehicles,
+            reminders = ReminderEvaluator.evaluate(reminders, mapOf(vehicleId to snapshot.odometerM), today),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VehicleUiState())
 

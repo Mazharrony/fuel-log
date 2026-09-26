@@ -49,6 +49,7 @@ import com.fuelexpenselog.app.ui.theme.FuelTheme
 import com.fuelexpenselog.domain.consumption.Gap
 import com.fuelexpenselog.domain.consumption.GapReason
 import com.fuelexpenselog.domain.consumption.Measured
+import java.text.NumberFormat
 
 @Composable
 fun GarageRoute(
@@ -247,6 +248,7 @@ private fun VehicleBlock(item: GarageVehicle, onClick: () -> Unit) {
             }
         }
         reasonOf(item)?.let { Text(it, style = type.meta, color = colors.textSecondary) }
+        DueBadge(item)
         if (item.recent.isNotEmpty()) {
             ConsumptionChart(
                 points = item.recent,
@@ -282,6 +284,29 @@ private fun VehicleBlock(item: GarageVehicle, onClick: () -> Unit) {
     }
 }
 
+/**
+ * "1 reminder overdue" in the danger ink, or "2 reminders due" in the warning ink. Nothing
+ * when nothing is due: a garage of fine vehicles stays quiet.
+ */
+@Composable
+private fun DueBadge(item: GarageVehicle) {
+    val f = LocalFormatters.current
+    val colors = FuelTheme.colors
+    val (count, plural, ink) = when {
+        item.overdueCount > 0 -> Triple(item.overdueCount, R.plurals.garage_overdue, colors.danger)
+        item.dueCount > 0 -> Triple(item.dueCount, R.plurals.garage_due, colors.warningInk)
+        else -> return
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        FuelIcon(R.drawable.ic_warning, null, tint = ink)
+        Text(
+            pluralStringResource(plural, count, NumberFormat.getIntegerInstance(f.locale).format(count)),
+            style = FuelTheme.type.meta,
+            color = ink,
+        )
+    }
+}
+
 /** The mixed-currency row: this month's spend first, the figure beneath it. */
 @Composable
 private fun CompactBlock(item: GarageVehicle, onClick: () -> Unit, archived: Boolean = false) {
@@ -307,6 +332,7 @@ private fun CompactBlock(item: GarageVehicle, onClick: () -> Unit, archived: Boo
                 overflow = TextOverflow.Ellipsis,
             )
             Text(metaLine(item, archived), style = type.meta, color = colors.textSecondary)
+            DueBadge(item)
         }
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(f.currency.formatAll(item.thisMonth), style = type.body, color = colors.textPrimary)

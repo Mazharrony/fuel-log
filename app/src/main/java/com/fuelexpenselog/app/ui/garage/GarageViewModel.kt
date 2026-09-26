@@ -12,6 +12,8 @@ import com.fuelexpenselog.domain.format.perDistanceUnit
 import com.fuelexpenselog.domain.model.Vehicle
 import com.fuelexpenselog.domain.money.CurrencySubtotals
 import com.fuelexpenselog.domain.money.Money
+import com.fuelexpenselog.domain.reminder.ReminderEvaluator
+import com.fuelexpenselog.domain.reminder.ReminderStatus
 import com.fuelexpenselog.domain.stats.StatsCalculator
 import com.fuelexpenselog.domain.time.CivilDate
 import com.fuelexpenselog.domain.unit.ConsumptionFormat
@@ -40,6 +42,9 @@ data class GarageVehicle(
     val thisMonth: List<Money> = emptyList(),
     val lastMonth: List<Money> = emptyList(),
     val costPerDistance: Money? = null,
+    /** Reminders due soon on this vehicle, and overdue: the badge. */
+    val dueCount: Int = 0,
+    val overdueCount: Int = 0,
 )
 
 sealed interface GarageUiState {
@@ -103,8 +108,18 @@ class GarageViewModel(
         repository.observeAllHistory(),
         showArchived,
         prefs.observeOnboardingDone(),
-    ) { all, history, show, onboarded ->
+        repository.observeAllActiveReminders(),
+    ) { vehicles, history, show, onboarded, reminders ->
         val today = CivilDate.today(clock, zone())
+        val statuses = ReminderEvaluator.evaluate(reminders, vehicles.associate { it.vehicle.id to it.odometerM }, today)
+            .groupBy({ it.first.vehicleId }, { it.second })
+        val all = vehicles.map { item ->
+            val mine = statuses[item.vehicle.id].orEmpty()
+            item.copy(
+                dueCount = mine.count { it is ReminderStatus.DueSoon },
+                overdueCount = mine.count { it is ReminderStatus.Overdue },
+            )
+        }
         // observeVehicles() includes archived rows; the garage is for the ones still driven.
         val (archived, active) = all.partition { it.vehicle.isArchived }
         val yearTotal = CurrencySubtotals.of(history.filter { it.second.date.year == today.year }.mapNotNull { it.second.amount })

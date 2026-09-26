@@ -15,6 +15,9 @@ import com.fuelexpenselog.app.ui.history.HistoryViewModel
 import com.fuelexpenselog.app.ui.months.MonthDetailViewModel
 import com.fuelexpenselog.app.ui.months.MonthsViewModel
 import com.fuelexpenselog.app.ui.onboarding.OnboardingViewModel
+import com.fuelexpenselog.app.ui.reminders.ReminderDoneViewModel
+import com.fuelexpenselog.app.ui.reminders.ReminderEditorViewModel
+import com.fuelexpenselog.app.ui.reminders.RemindersViewModel
 import com.fuelexpenselog.app.ui.settings.SettingsViewModel
 import com.fuelexpenselog.app.ui.stats.StatisticsViewModel
 import com.fuelexpenselog.app.ui.vehicle.VehicleViewModel
@@ -64,6 +67,9 @@ object FuelViewModels {
             val c = container
             ExportViewModel(createSavedStateHandle(), c.repository, c.saf, c.clock, c.zone)
         }
+        initializer { RemindersViewModel(createSavedStateHandle(), container.repository, container.clock, container.zone) }
+        initializer { ReminderEditorViewModel(createSavedStateHandle(), container.repository, container.clock, container.zone) }
+        initializer { ReminderDoneViewModel(createSavedStateHandle(), container.repository, container.clock, container.zone) }
     }
 
     private val CreationExtras.container: AppContainer

@@ -255,6 +255,10 @@ interface ReminderDao {
     )
     fun observeActiveForVehicle(vehicleId: Long): Flow<List<ReminderEntity>>
 
+    /** Garage's badges, every vehicle at once. Leads with isActive on the notify index. */
+    @Query("SELECT * FROM reminder WHERE isActive = 1")
+    fun observeAllActive(): Flow<List<ReminderEntity>>
+
     /** The daily alarm's scan, across every vehicle at once. */
     @Query(
         """
@@ -279,6 +283,10 @@ interface ReminderDao {
 
     @Delete
     suspend fun delete(reminder: ReminderEntity)
+
+    /** One column, so a notice being recorded can never write over an edit made meanwhile. */
+    @Query("UPDATE reminder SET lastNotifiedLocalDate = :date WHERE id = :id")
+    suspend fun markNotified(id: Long, date: Int)
 
     @Query("SELECT * FROM reminder_completion WHERE reminderId = :reminderId ORDER BY completedLocalDate DESC")
     suspend fun completions(reminderId: Long): List<ReminderCompletionEntity>

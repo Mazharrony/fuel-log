@@ -186,7 +186,12 @@ private fun SummaryCell(label: String, value: String, note: String?, modifier: M
 
 /** The red delete row an edit ends with, confirmed before anything happens. */
 @Composable
-fun DeleteEntryRow(text: String, onDelete: () -> Unit) {
+fun DeleteEntryRow(
+    text: String,
+    onDelete: () -> Unit,
+    title: String = stringResource(R.string.entry_delete_title),
+    body: String = stringResource(R.string.entry_delete_body),
+) {
     val colors = FuelTheme.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
     Text(
@@ -202,8 +207,8 @@ fun DeleteEntryRow(text: String, onDelete: () -> Unit) {
     )
     if (confirm) {
         ConfirmDialog(
-            title = stringResource(R.string.entry_delete_title),
-            body = stringResource(R.string.entry_delete_body),
+            title = title,
+            body = body,
             confirm = stringResource(R.string.action_delete),
             danger = true,
             onConfirm = {

@@ -34,6 +34,7 @@ import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
+import com.fuelexpenselog.app.ui.common.Hairline
 import com.fuelexpenselog.app.ui.common.IconBox
 import com.fuelexpenselog.app.ui.common.OutlineButton
 import com.fuelexpenselog.app.ui.common.SectionLabel
@@ -46,6 +47,7 @@ import com.fuelexpenselog.app.ui.common.dashOr
 import com.fuelexpenselog.app.ui.common.label
 import com.fuelexpenselog.app.ui.common.topHairline
 import com.fuelexpenselog.app.ui.history.HistoryRowItem
+import com.fuelexpenselog.app.ui.reminders.ReminderRow
 import com.fuelexpenselog.app.ui.theme.Dimens
 import com.fuelexpenselog.app.ui.theme.FuelTheme
 import com.fuelexpenselog.domain.consumption.Confidence
@@ -68,6 +70,9 @@ class VehicleNavigation(
     val onOpenFillUp: (Long) -> Unit,
     val onAddFillUp: (Long) -> Unit,
     val onAddExpense: (Long) -> Unit,
+    val onReminders: (Long) -> Unit,
+    val onOpenReminder: (Long) -> Unit,
+    val onReminderDone: (Long) -> Unit,
 )
 
 @Composable
@@ -126,6 +131,25 @@ fun VehicleScreen(
                     modifier = Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, top = 16.dp),
                 )
             }
+            val due = state.due
+            if (due.isNotEmpty()) {
+                item(key = "due-label") {
+                    SectionLabel(
+                        stringResource(R.string.vehicle_due),
+                        Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, top = 20.dp, bottom = 6.dp),
+                    )
+                }
+                items(due, key = { "r${it.first.id}" }) { (reminder, status) ->
+                    ReminderRow(
+                        reminder = reminder,
+                        status = status,
+                        unit = vehicle.distanceUnit,
+                        onOpen = { navigation.onOpenReminder(reminder.id) },
+                        onDone = { navigation.onReminderDone(reminder.id) },
+                    )
+                }
+                item(key = "due-end") { Hairline() }
+            }
             item(key = "links") {
                 Row(
                     Modifier.padding(start = Dimens.gutter, end = Dimens.gutter, top = 18.dp, bottom = 22.dp),
@@ -175,6 +199,9 @@ fun VehicleScreen(
                             .padding(horizontal = Dimens.gutter, vertical = 15.dp),
                     )
                 }
+            }
+            item(key = "reminders") {
+                RemindersLink(state.reminders.size, onClick = { navigation.onReminders(vehicle.id) })
             }
             if (state.lastDone.isNotEmpty()) {
                 item(key = "last-done") { LastDonePanel(state, vehicle) }
@@ -346,6 +373,40 @@ private fun Strip(state: VehicleUiState) {
             ),
         ),
     )
+}
+
+/** The way into the reminders list, with how many there are - or an invitation to add one. */
+@Composable
+private fun RemindersLink(count: Int, onClick: () -> Unit) {
+    val f = LocalFormatters.current
+    val colors = FuelTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = Dimens.minTouchTarget)
+            .padding(top = 22.dp)
+            .topHairline(colors.outline)
+            .bottomHairline(colors.outline)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = Dimens.gutter, vertical = 15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.vehicle_reminders),
+            style = FuelTheme.type.button,
+            color = colors.textPrimary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            if (count == 0) {
+                stringResource(R.string.vehicle_reminders_none)
+            } else {
+                pluralStringResource(R.plurals.vehicle_reminders_count, count, NumberFormat.getIntegerInstance(f.locale).format(count))
+            },
+            style = FuelTheme.type.meta,
+            color = colors.textSecondary,
+        )
+    }
 }
 
 @Composable

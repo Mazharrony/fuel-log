@@ -35,6 +35,15 @@ object Routes {
     const val MONTH_DETAIL = "vehicle/{$ARG_ID}/month/{$ARG_MONTH}"
     fun monthDetail(id: Long, month: Int) = "vehicle/$id/month/$month"
 
+    const val REMINDERS = "vehicle/{$ARG_ID}/reminders"
+    fun reminders(vehicleId: Long) = "vehicle/$vehicleId/reminders"
+    const val REMINDER_NEW = "reminder/new?$ARG_VEHICLE={$ARG_VEHICLE}"
+    fun reminderNew(vehicleId: Long) = "reminder/new?$ARG_VEHICLE=$vehicleId"
+    const val REMINDER_EDIT = "reminder/{$ARG_ID}/edit"
+    fun reminderEdit(id: Long) = "reminder/$id/edit"
+    const val REMINDER_DONE = "reminder/{$ARG_ID}/done"
+    fun reminderDone(id: Long) = "reminder/$id/done"
+
     /** [ARG_VEHICLE] 0 means "the vehicle used last". */
     const val FILLUP_NEW = "fillup/new?$ARG_VEHICLE={$ARG_VEHICLE}"
     fun fillUpNew(vehicleId: Long = 0) = "fillup/new?$ARG_VEHICLE=$vehicleId"

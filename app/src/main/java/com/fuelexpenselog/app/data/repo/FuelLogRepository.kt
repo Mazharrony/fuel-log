@@ -1,7 +1,9 @@
 package com.fuelexpenselog.app.data.repo
 
+import androidx.room.withTransaction
 import com.fuelexpenselog.app.data.db.FuelLogDatabase
 import com.fuelexpenselog.app.data.db.entity.ImportBatchEntity
+import com.fuelexpenselog.app.data.db.entity.ReminderCompletionEntity
 import com.fuelexpenselog.domain.consumption.ConsumptionEngine
 import com.fuelexpenselog.domain.consumption.ConsumptionResult
 import com.fuelexpenselog.domain.consumption.DeclaredSegment
@@ -12,6 +14,10 @@ import com.fuelexpenselog.domain.model.HistoryEntry
 import com.fuelexpenselog.domain.model.MaybeUnreadable
 import com.fuelexpenselog.domain.model.Vehicle
 import com.fuelexpenselog.domain.model.buildHistory
+import com.fuelexpenselog.domain.reminder.Reminder
+import com.fuelexpenselog.domain.reminder.ReminderCompletion
+import com.fuelexpenselog.domain.reminder.ReminderEvaluator
+import com.fuelexpenselog.domain.time.CivilDate
 import com.fuelexpenselog.domain.unit.EnergyKind
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +51,7 @@ class FuelLogRepository(
     private val expenses get() = database().expenseDao()
     private val segments get() = database().odometerSegmentDao()
     private val batches get() = database().importBatchDao()
+    private val reminders get() = database().reminderDao()
 
     // -- vehicles ------------------------------------------------------------------------
 
@@ -221,6 +228,65 @@ class FuelLogRepository(
                 createdAtMillis = now(),
             ),
         )
+
+    // -- reminders --------------------------------------------------------------------------
+
+    fun observeReminders(vehicleId: Long): Flow<List<Reminder>> =
+        reminders.observeActiveForVehicle(vehicleId).map { list -> list.map { it.toDomain() } }
+
+    fun observeAllActiveReminders(): Flow<List<Reminder>> =
+        reminders.observeAllActive().map { list -> list.map { it.toDomain() } }
+
+    suspend fun reminder(id: Long): Reminder? = reminders.byId(id)?.toDomain()
+
+    suspend fun addReminder(reminder: Reminder): Long = reminders.insert(reminder.toEntity(now()))
+
+    suspend fun updateReminder(reminder: Reminder) {
+        val existing = reminders.byId(reminder.id) ?: return
+        reminders.update(reminder.toEntity(now(), createdAtMillis = existing.createdAtMillis))
+    }
+
+    /** Its completions go with it. The expenses it logged stay, as ordinary expenses. */
+    suspend fun deleteReminder(id: Long) {
+        reminders.byId(id)?.let { reminders.delete(it) }
+    }
+
+    /** Newest first. */
+    suspend fun completions(reminderId: Long): List<ReminderCompletion> =
+        reminders.completions(reminderId).map { it.toDomain() }
+
+    /** The daily check's scan: active reminders that may notify. */
+    suspend fun notifiableReminders(): List<Reminder> = reminders.allNotifiable().map { it.toDomain() }
+
+    suspend fun markNotified(id: Long, date: CivilDate) = reminders.markNotified(id, date.value)
+
+    /**
+     * Done on [on]: the expense it cost if there is one, the completion, and the reminder
+     * moved on to its next round - all of it or none of it.
+     *
+     * [odometerM] is the reading typed, and only that is recorded on the completion. With none
+     * typed, the vehicle's current reading anchors the next distance: "done now" is the best
+     * knowledge there is, and no anchor at all would leave the distance uncounted.
+     */
+    suspend fun completeReminder(id: Long, on: CivilDate, odometerM: Long?, expense: Expense?, note: String? = null): Reminder? =
+        database().withTransaction {
+            val stored = reminders.byId(id)?.toDomain() ?: return@withTransaction null
+            val expenseId = expense?.let { addExpense(it.copy(vehicleId = stored.vehicleId, reminderId = id)) }
+            reminders.insertCompletion(
+                ReminderCompletionEntity(
+                    reminderId = id,
+                    vehicleId = stored.vehicleId,
+                    completedLocalDate = on.value,
+                    odometerM = odometerM,
+                    expenseId = expenseId,
+                    note = note,
+                    createdAtMillis = now(),
+                ),
+            )
+            val next = ReminderEvaluator.advance(stored, on, odometerM ?: currentOdometer(stored.vehicleId))
+            reminders.update(next.toEntity(now(), createdAtMillis = stored.createdAtMillis))
+            next
+        }
 
     // -- bulk, for CSV and backup --------------------------------------------------------------
 
