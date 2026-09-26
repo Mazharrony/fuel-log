@@ -8,7 +8,10 @@ object Routes {
     const val ARG_ID = "id"
     const val ARG_VEHICLE = "vehicle"
 
+    const val ONBOARDING = "onboarding"
     const val GARAGE = "garage"
+    const val SETTINGS = "settings"
+    const val COLLECTS = "settings/collects"
 
     const val VEHICLE_NEW = "vehicle/new"
     const val VEHICLE_EDIT = "vehicle/{$ARG_ID}/edit"

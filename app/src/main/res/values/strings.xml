@@ -184,6 +184,78 @@
     <string name="gap_zero_distance">The readings do not move forward here</string>
     <string name="gap_no_energy">A full tank with no volume recorded</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_eyebrow_local">Read from your phone, not the internet</string>
+    <string name="onboarding_country_title">Where do you drive?</string>
+    <string name="onboarding_country_body">Your region sets the units and currency. Both stay adjustable, and currency is kept per vehicle.</string>
+    <string name="onboarding_country_search">Search countries</string>
+    <string name="onboarding_selected">Selected</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_units_title">Does this look right?</string>
+    <string name="onboarding_detected">Detected · %1$s</string>
+    <string name="onboarding_chosen">Chosen · %1$s</string>
+    <string name="onboarding_device_setting">Device setting</string>
+    <string name="onboarding_row_region">Region</string>
+    <string name="onboarding_row_distance">Distance</string>
+    <string name="onboarding_row_volume">Volume</string>
+    <string name="onboarding_row_currency">Currency</string>
+    <string name="onboarding_other_set">Or pick a different set</string>
+    <string name="onboarding_units_footnote">Every vehicle keeps its own units and currency, so this only sets the default for the first one. Change it any time in the vehicle\'s settings.</string>
+    <string name="onboarding_units_continue">Looks right — continue</string>
+    <string name="onboarding_vehicle_eyebrow">Two questions, then it gets out of the way</string>
+    <string name="onboarding_vehicle_title">What are you tracking?</string>
+    <string name="onboarding_vehicle_name">Vehicle name</string>
+    <string name="onboarding_privacy">No account, no sign-in, no internet permission. Check the permission list before you trust that.</string>
+    <string name="onboarding_start">Start logging</string>
+    <string name="preset_us">US</string>
+    <string name="preset_uk">UK</string>
+    <string name="preset_uk_gallons">UK gallons</string>
+    <string name="preset_metric">Metric</string>
+    <string name="preset_summary">%1$s · %2$s · %3$s</string>
+    <string name="country_no_name">Other region</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="cd_settings">Settings</string>
+    <string name="settings_format">Consumption shown as</string>
+    <string name="settings_new_vehicles">New vehicles start with</string>
+    <string name="settings_region">Region · sets new-vehicle defaults</string>
+    <string name="settings_region_value">%1$s ›</string>
+    <string name="settings_region_note">Changing the region changes defaults for vehicles you add from now on. Existing vehicles keep their units and currency.</string>
+    <string name="settings_your_data">Your data</string>
+    <string name="settings_export">Export CSV</string>
+    <string name="settings_export_hint">Fill-ups and expenses, for a spreadsheet or an accountant</string>
+    <string name="settings_backup">Back up</string>
+    <string name="settings_backup_hint">One file with everything, to keep wherever you like</string>
+    <string name="settings_restore">Restore from a backup</string>
+    <string name="settings_restore_hint">Replaces everything in the app with the backup</string>
+    <string name="settings_import">Import CSV</string>
+    <string name="settings_import_hint">From aCar, Drivvo, Fuelio or a spreadsheet</string>
+    <string name="settings_not_yet">Arrives in a later update</string>
+    <string name="settings_collects">What this app collects</string>
+    <string name="settings_collects_hint">Nothing about you. Here is exactly what it stores.</string>
+    <string name="settings_footer">No internet permission, no account, no ads, no analytics.</string>
+    <string name="format_short_mpg_us">MPG US</string>
+    <string name="format_short_mpg_uk">MPG UK</string>
+    <string name="format_short_l_per_100km">L/100km</string>
+    <string name="format_short_km_per_l">km/L</string>
+
+    <!-- What this app collects -->
+    <string name="collects_title">What this app collects</string>
+    <string name="collects_lead">Nothing about you. No internet permission, no account, no ads, no analytics.</string>
+    <string name="collects_stored_heading">What it stores</string>
+    <string name="collects_stored_body">Your vehicles, fill-ups, expenses and reminders, and a handful of settings. They live in the app\'s private storage on this phone.</string>
+    <string name="collects_backup_heading">Android\'s own backup</string>
+    <string name="collects_backup_body">If Android backup is on for this phone, Android copies the app\'s data to your Google account, as it does for other apps. On Android 9 and later that copy is end-to-end encrypted with your screen lock, so Google cannot read it. You can turn it off in the phone\'s settings.</string>
+    <string name="collects_permissions_heading">Permissions</string>
+    <string name="collects_permissions_body">Notifications, asked for only when you turn reminders on. Run at startup, used only to set reminders again after the phone restarts. Nothing else - check the permission list in the phone\'s app settings.</string>
+    <string name="collects_not_heading">What it does not do</string>
+    <string name="collects_not_body">No ads, no analytics, no crash reporting, no location, no contacts, no camera.</string>
+    <string name="collects_delete_heading">Deleting your data</string>
+    <string name="collects_delete_body">Delete a vehicle to remove it and all its entries, or uninstall the app to remove everything. CSV exports and backups you saved are files you control.</string>
+    <string name="collects_licences_heading">Open-source licences</string>
+    <string name="collects_licences_body">Instrument Sans, copyright 2022 The Instrument Sans Project Authors, used under the SIL Open Font License 1.1.</string>
+
     <!-- Currency picker -->
     <string name="currency_picker_title">Currency</string>
     <string name="currency_search">Search by code or name</string>

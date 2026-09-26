@@ -18,10 +18,13 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_FuelLog)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // One small SharedPreferences read, decided before the first frame so a fresh install
+        // never flashes Garage on its way to onboarding.
+        val onboarded = (application as FuelLogApp).container.prefs.onboardingDone
         setContent {
             FuelLogTheme {
                 CompositionLocalProvider(LocalFormatters provides rememberFormatters()) {
-                    FuelNavHost()
+                    FuelNavHost(onboarded)
                 }
             }
         }

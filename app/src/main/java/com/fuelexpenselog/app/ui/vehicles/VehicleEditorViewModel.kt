@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fuelexpenselog.app.data.prefs.AppPrefs
 import com.fuelexpenselog.app.data.repo.FuelLogRepository
+import com.fuelexpenselog.app.format.LocaleDefaults
 import com.fuelexpenselog.app.ui.nav.Routes
 import com.fuelexpenselog.domain.model.EntryTag
 import com.fuelexpenselog.domain.model.FuelType
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Currency
 import java.util.Locale
 
 data class VehicleEditorUiState(
@@ -225,16 +225,14 @@ class VehicleEditorViewModel(
         )
     }
 
-    /** Units and currency default from the app settings, then the phone's own locale. */
+    /** Units and currency default from the app settings, then what the phone's locale implies. */
     private fun newVehicleForm(): VehicleForm {
-        val currency = prefs.defaultCurrency
-            ?: runCatching { Currency.getInstance(locale())?.currencyCode }.getOrNull()
-            ?: "USD"
+        val region = LocaleDefaults.detect(locale())
         return VehicleForm(
             name = "",
-            distanceUnit = prefs.defaultDistanceUnit ?: DistanceUnit.KILOMETRE,
-            volumeUnit = prefs.defaultVolumeUnit ?: EnergyUnit.LITRE,
-            currency = currency,
+            distanceUnit = prefs.defaultDistanceUnit ?: region.distanceUnit,
+            volumeUnit = prefs.defaultVolumeUnit ?: region.volumeUnit,
+            currency = prefs.defaultCurrency ?: region.currencyCode,
             tankText = "",
             tankEdited = false,
             type = VehicleType.CAR,

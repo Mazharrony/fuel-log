@@ -83,6 +83,14 @@ class AppPrefs(context: Context) {
     fun observeDismissedProposals(): Flow<Set<String>> =
         observe(KEY_DISMISSED_PROPOSALS) { dismissedProposals }
 
+    /** One emission now and one per change to any key: for a screen that shows them all. */
+    fun changes(): Flow<Unit> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> trySend(Unit) }
+        sp.registerOnSharedPreferenceChangeListener(listener)
+        send(Unit)
+        awaitClose { sp.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.conflate()
+
     /**
      * Current value first, then one emission per change to [key]. A null key in the callback
      * means the whole file was cleared (API 30+), which changes every value.

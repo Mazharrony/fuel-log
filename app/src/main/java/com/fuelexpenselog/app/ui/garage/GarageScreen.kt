@@ -35,6 +35,7 @@ import com.fuelexpenselog.app.di.FuelViewModels
 import com.fuelexpenselog.app.format.LocalFormatters
 import com.fuelexpenselog.app.ui.common.FuelIcon
 import com.fuelexpenselog.app.ui.common.FuelScreen
+import com.fuelexpenselog.app.ui.common.IconBox
 import com.fuelexpenselog.app.ui.common.SplitActionBar
 import com.fuelexpenselog.app.ui.common.bottomHairline
 import com.fuelexpenselog.app.ui.common.dashOr
@@ -49,6 +50,7 @@ fun GarageRoute(
     onOpenVehicle: (Long) -> Unit,
     onAddFillUp: () -> Unit,
     onAddExpense: () -> Unit,
+    onSettings: () -> Unit,
     viewModel: GarageViewModel = viewModel(factory = FuelViewModels.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,6 +61,7 @@ fun GarageRoute(
         onToggleArchived = viewModel::toggleArchived,
         onAddFillUp = onAddFillUp,
         onAddExpense = onAddExpense,
+        onSettings = onSettings,
     )
 }
 
@@ -71,9 +74,10 @@ fun GarageScreen(
     onToggleArchived: () -> Unit,
     onAddFillUp: () -> Unit = {},
     onAddExpense: () -> Unit = {},
+    onSettings: () -> Unit = {},
 ) {
     FuelScreen {
-        GarageHeader()
+        GarageHeader(onSettings)
         when (state) {
             GarageUiState.Loading -> Unit
             is GarageUiState.Ready -> {
@@ -93,12 +97,12 @@ fun GarageScreen(
 }
 
 @Composable
-private fun GarageHeader() {
+private fun GarageHeader(onSettings: () -> Unit) {
     val colors = FuelTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Dimens.gutter, end = Dimens.gutter, top = 22.dp, bottom = 20.dp),
+            .padding(start = Dimens.gutter, end = 8.dp, top = 22.dp, bottom = 20.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
         Text(
@@ -126,6 +130,7 @@ private fun GarageHeader() {
                 color = colors.textSecondary,
             )
         }
+        IconBox(R.drawable.ic_settings, stringResource(R.string.cd_settings), onSettings)
     }
 }
 
